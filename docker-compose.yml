@@ -1,0 +1,40 @@
+version: "3.8"
+   
+services:
+
+    database:
+        container_name: sharedpathmap-db
+        image: postgres
+        environment:
+            - POSTGRES_DB=postgres
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+
+    api:
+        container_name: sharedpathmap-api
+        build: ./backend
+        command:
+            - /bin/bash
+            - -c
+            - |
+              python manage.py migrate
+              python manage.py initadmin
+              python manage.py runserver 0.0.0.0:8000
+        volumes:
+            - ./backend:/code
+        ports:
+            - 8000:8000
+        depends_on:
+            - database
+
+    ui:
+        container_name: sharedpathmap-ui
+        build: ./frontend
+        command: npm run start
+        volumes:
+            - ./frontend:/code
+            - /code/node_modules
+        ports:
+            - 3000:3000
+        depends_on:
+            - api
