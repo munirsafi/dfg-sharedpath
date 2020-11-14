@@ -14,12 +14,10 @@ import './Login.scss'
 function Copyright() {
     return (
         <Typography variant="body2" color="textSecondary" align="center">
-            {'Copyright © '}
-            <Link color="inherit" href="https://material-ui.com/">
-                Your Website
-      </Link>{' '}
-            {new Date().getFullYear()}
-            {'.'}
+            {' If your Indigenous community has land interests in Ontario but does not have an account, please contact '}
+            <Link color="primary" href="mailto:admin@sharedpath.ca">
+            admin@sharedpath.ca
+      </Link>
         </Typography>
     );
 }
@@ -27,12 +25,12 @@ function Copyright() {
 export default function Login() {
 
     return (
-        <Container component="main" maxWidth="xs">
+        <Container className="tm32" component="main" maxWidth="xs">
             <CssBaseline />
             <div className="paper">
                 <div className="pad">
                     <Typography component="h1" variant="h5">
-                        Sign up
+                        Login
                     </Typography>
                 </div>
                 <form noValidate>
@@ -68,7 +66,7 @@ export default function Login() {
                             variant="contained"
                             color="primary"
                         >
-                            Sign Up
+                            Login
                         </Button>
                     </div>
                 </form>
