@@ -38,7 +38,6 @@ export default function App() {
                 >
                 Shared Path Website
                 </a> 
-                {/* <MapDup/> */}
 
             </header>
 

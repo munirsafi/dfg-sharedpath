@@ -1,51 +1,39 @@
-import React from 'react';
+//@ts-nocheck
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Polygon, FeatureGroup, Marker, Popup, Circle} from 'react-leaflet';
-import { EditControl } from "react-leaflet-draw";
 import * as turf from '@turf/turf';
-import { ShapeFile } from "react-leaflet-shapefile";
-import "../scss/Map.scss";
 
-// const Component = () => (
-//   <FeatureGroup>
-//     <EditControl
-//       position='topright'
-//       onEdited={this._onEditPath}
-//       onCreated={this._onCreate}
-//       onDeleted={this._onDeleted}
-//       draw={{
-//         rectangle: false
-//       }}
-//     />
-//     <Circle center={[51.51, -0.06]} radius={200} />
-//   </FeatureGroup>
-// );
+export default function Map() {
+var mapElement=document.getElementById("map");
+var map = L.map(mapElement).setView([43.6532, -79.3832], 11);
 
-export default function MapApp() {
-  return (
+L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+
+var poly = {"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[
+[-91,54],
+[-86,53],
+[-83,52],
+[-84,50],
+[-90,51]]]}}]};
+
+var polyLayer = L.geoJSON(poly).addTo(map);
 
 
-    <MapContainer center={[50.040384, -85.888311]} zoom={5}>
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-      />
-      <Polygon pathOptions={{ color: 'purple' }} positions={[[54, -91],
-      [53, -86],
-      [52, -83],
-      [50, -84],
-      [51, -90]]} />
+// GRID
+var bbox = polyLayer.getBounds().toBBoxString().split(',').map(Number);
+console.log(bbox);
+var cellSide = 20;
+var mask = polyLayer.toGeoJSON().features[0];
+var options = {
+    units: 'kilometers',
+    mask: mask
+};
 
-      <Polygon pathOptions={{ color: 'green' }} positions={[[51, -87],
-      [52, -85],
-      [55, -86],
-      [54, -87]]} />
-      {/* <Marker position = {[52,-87]}>
-    <Popup>
-        <b>Nation 1</b> <br /> Contact info. <br/> Phone #.
-      </Popup>
-    </Marker> */}
-    </MapContainer >
-  );
+var squareGrid = turf.squareGrid(bbox, cellSide, options);
+
+var gridLayer = L.geoJSON(squareGrid, {color: "#008800", weight: 1, fill:0}).addTo(map);
+map.fitBounds(gridLayer.getBounds());
+
+return(<div id="map" style="width: 600px; height: 400px"></div>)
 }

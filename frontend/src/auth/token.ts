@@ -22,7 +22,7 @@ export default {
             }
         });
         if (response.data.access) {
-            const token: Token = JSON.parse(localStorage.getItem('token'));
+            const token: Token = JSON.parse('10');
             token.access = response.data.access;
             localStorage.setItem("token", JSON.stringify(token))
         }
