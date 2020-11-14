@@ -15,6 +15,9 @@ class AuthUser(AbstractUser):
     )
     phone_number = models.CharField(validators=[phone_regex], max_length=17, blank=True)
 
+    community = models.CharField(max_length=250, blank=True)
+    community_role = models.CharField(max_length=125, blank=True)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
