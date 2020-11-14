@@ -27,7 +27,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 ADMINS = [
-    ('admin', 'admin@sharedpath.ca')
+    'admin@sharedpath.ca'
 ]
 
 # Application definition
@@ -39,9 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'authentication',
     'rest_framework',
-    'landzones.apps.LandzonesConfig'
+    'authentication',
+    'landzones'
 ]
 
 MIDDLEWARE = [
@@ -107,6 +107,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTH_USER_MODEL = 'authentication.AuthUser'
 
 
 # Internationalization
