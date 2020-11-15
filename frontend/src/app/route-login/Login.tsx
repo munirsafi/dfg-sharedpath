@@ -1,6 +1,5 @@
 
 import React, { useState, ChangeEvent } from 'react';
-
 import { useHistory } from 'react-router-dom';
 
 import Button from '@material-ui/core/Button';
@@ -12,6 +11,7 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 
+import NavBar from '../core/navbar/NavBar';
 import './Login.scss'
 
 import Authentication from '../../services/Authentication';
@@ -52,6 +52,7 @@ export default function Login() {
 
     return (
         <div className="sharedpath-login">
+            <NavBar/>
             <Container className="tm32" component="main" maxWidth="xs">
                 <CssBaseline />
                 <div className="paper">
