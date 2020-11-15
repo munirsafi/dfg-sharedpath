@@ -105,6 +105,22 @@ const Authentication = {
     logout: (): void => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+    },
+
+    /**
+     * @summary     Gets login status of the user
+     * 
+     * @author      Munir Safi
+     * @since       2020-11-15
+     * @returns     True if the user is actively logged in, or false if not
+     */
+    status: () : boolean => {
+        const accessToken = localStorage.getItem('access_token');
+        if (accessToken !== '') {
+            return true;
+        }
+
+        return false;
     }
 }
 

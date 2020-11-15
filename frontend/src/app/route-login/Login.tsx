@@ -1,6 +1,8 @@
 
 import React, { useState, ChangeEvent } from 'react';
 
+import { useHistory } from 'react-router-dom';
+
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
@@ -30,9 +32,14 @@ export default function Login() {
     const [email, setEmail] = useState<string | undefined>();
     const [password, setPassword] = useState<string | undefined>();
 
+    const history = useHistory();
+
     const submitLogin = async () => {
         const status = await Authentication.login(email as string, password as string);
-        console.log(status);
+        if (status === true) {
+            alert('Login successful! Redirecting you to the map screen');
+            history.push('/');
+        }
     }
 
     return (
