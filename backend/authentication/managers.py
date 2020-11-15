@@ -11,8 +11,10 @@ class AuthUserManager(BaseUserManager):
         """
         Create and save a normal user with the given email and password
 
-        :email {str} user email address
-        :password {str} user account password
+        :author     Munir Safi
+        :since      2020-11-13
+        :param      {email} user email address
+        :param      {password} user account password
         """
         if email is None:
             raise ValueError(_('An email must be set!'))
@@ -27,8 +29,10 @@ class AuthUserManager(BaseUserManager):
         """
         Create and save a SuperUser with the given email and password
 
-        :email {str} user email address
-        :password {str} user account password
+        :author     Munir Safi
+        :since      2020-11-13
+        :param      {email} user email address
+        :param      {password} user account password
         """
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)

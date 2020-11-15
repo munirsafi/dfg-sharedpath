@@ -7,6 +7,12 @@ from django.utils.translation import ugettext_lazy as _
 from .models import AuthUser
 
 class AuthUserAdmin(UserAdmin):
+    """
+    Creates the admin dashboard section for the custom auth user model
+
+    :author     Munir Safi
+    :since      2020-11-13
+    """
     model = AuthUser
     list_display = ('email', 'first_name', 'last_name', 'phone_number')
     ordering = ('email', 'first_name', 'last_name')

@@ -6,6 +6,14 @@ from django.utils.translation import ugettext_lazy as _
 from .managers import AuthUserManager
 
 class AuthUser(AbstractUser):
+    """
+    SharedPath Map Application's custom user model; includes new attributes
+    such as phone number, community, and role, as well as setting the email
+    as the primary identifier instead of a username
+
+    :author     Munir Safi
+    :since      2020-11-13
+    """
     username = None
     email = models.EmailField(_('email address'), unique=True)
 
@@ -25,3 +33,6 @@ class AuthUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+    def get_editable_fields(self, **kwargs):
+        return ['first_name', 'last_name', 'phone_number', 'community', 'community_role']
