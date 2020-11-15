@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+
 class LandZoneView(APIView):
     authentication_classes = []
 
@@ -32,7 +33,7 @@ class LandZoneView(APIView):
 
             return Response(status=status.HTTP_200_OK)
         else:
-            return Response({ 'message': 'Cannot save landzones' }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'Cannot save landzones'}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
         """
@@ -44,14 +45,9 @@ class LandZoneView(APIView):
         :param      {request} the incoming rest_framework http request object
         """
         if request.headers.get('Authorization', None) is not None:
-            header_token = request.headers['Authorization'].split(' ')[1]
-            jwt_object = JWTAuthentication()
-            valid_token = jwt_object.get_validated_token(header_token)
-            user_email = jwt_object.get_user(valid_token)
-
             AuthUser = get_user_model()
-            user = AuthUser.objects.get(email=user_email)
+            users = AuthUser.objects.all()
 
-            return Response(user)
+            return Response(users)
         else:
-            return Response({ 'message': 'Cannot save landzones' }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'Cannot save landzones'}, status=status.HTTP_400_BAD_REQUEST)

@@ -28,7 +28,7 @@ class AuthUser(AbstractUser):
     community_phone = models.CharField(max_length=125, blank=True)
     community_email = models.CharField(max_length=125, blank=True)
     community_link = models.CharField(max_length=750, blank=True)
-    landzones = models.JSONField()
+    landzones = models.JSONField(default=dict)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
