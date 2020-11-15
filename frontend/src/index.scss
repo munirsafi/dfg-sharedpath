@@ -11,3 +11,7 @@ body, html {
 #root, #sharedpath-app {
     height: 100%;
 }
+
+.sharedpath-page {
+    height: calc(100% - 64px);
+}

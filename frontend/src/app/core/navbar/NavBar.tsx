@@ -25,7 +25,7 @@ export default function NavBar(props: any) {
     const history = useHistory();
 
     return (
-        <div className="fg">
+        <div className="header">
             <AppBar position="static">
                 <Toolbar className="header-toolbar">
                     <IconButton
