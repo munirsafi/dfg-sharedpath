@@ -1,7 +1,6 @@
 import React from 'react';
-import { Map } from './components/Map';
-import '../scss/App.scss';
-
+import { Map } from './components/map/Map';
+import './scss/App.scss';
 
 export default function App() {
     return (
