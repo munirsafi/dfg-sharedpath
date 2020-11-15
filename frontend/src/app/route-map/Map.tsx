@@ -1,10 +1,12 @@
-import React from 'react';
-import { useEffect } from 'react';
-import * as turf from '@turf/turf';
+import React, { useEffect } from 'react';
+
 import L from 'leaflet';
 import leafletDraw from 'leaflet-draw';
 
+import * as turf from '@turf/turf';
+
 import './Map.scss';
+import Authentication from '../../services/Authentication';
 
 export default function Map() {
 
@@ -22,21 +24,23 @@ export default function Map() {
 
         const drawnItems = new L.FeatureGroup();
         leafletMap.addLayer(drawnItems);
-        // @ts-ignore
-        const drawControl = new L.Control.Draw({
-            position: 'bottomright',
-            draw: {
-                marker: false,
-                circlemarker: false,
-                circle: false,
-                rectangle: false,
-                polyline: false
-            },
-            edit: {
-                featureGroup: drawnItems
-            }
-        });
-        leafletMap.addControl(drawControl);
+
+        if (Authentication.status() === true) {
+            const drawControl = new L.Control.Draw({
+                position: 'bottomright',
+                draw: {
+                    marker: false,
+                    circlemarker: false,
+                    circle: false,
+                    rectangle: false,
+                    polyline: false
+                },
+                edit: {
+                    featureGroup: drawnItems
+                }
+            });
+            leafletMap.addControl(drawControl);
+        }
 
         leafletMap.on('draw:created', function (e) {
             const type = (e as L.DrawEvents.Created).layerType,
