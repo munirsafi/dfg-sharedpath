@@ -34,11 +34,19 @@ export default function Login() {
 
     const history = useHistory();
 
-    const submitLogin = async () => {
+    /**
+     * @summary     Attempts to login using the inputted email and password
+     * 
+     * @author      Munir Safi
+     * @since       2020-11-15
+     */
+    const submitLogin = async () : Promise<void> => {
         const status = await Authentication.login(email as string, password as string);
         if (status === true) {
             alert('Login successful! Redirecting you to the map screen');
             history.push('/');
+        } else {
+            alert('Invalid email or password provided, please try again!');
         }
     }
 
