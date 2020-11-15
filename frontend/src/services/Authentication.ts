@@ -66,12 +66,20 @@ const Authentication = {
         const options = {
             headers: generateHeaders()
         };
-        const response: AxiosResponse<Token> = await axios.post(`${API_URL}/auth/token/`, data, options);
-        if (response.data.access && response.data.refresh) {
-            localStorage.setItem("access_token", response.data.access);
-            localStorage.setItem("refresh_token", response.data.refresh);
 
-            return true
+        try {
+            const response: AxiosResponse<Token> = await axios.post(`${API_URL}/auth/token/`, data, options);
+            if (response.data.access && response.data.refresh) {
+                localStorage.setItem("access_token", response.data.access);
+                localStorage.setItem("refresh_token", response.data.refresh);
+
+                return true
+            }
+        } catch(err) {
+            if (localStorage.getItem('DEBUG') === '*') {
+                console.error('An error occurred when attempting to login: ', err);
+            }
+            return false;
         }
 
         return false;
