@@ -6,12 +6,14 @@ import FormLabel from '@material-ui/core/FormLabel';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 
+import NavBar from '../core/navbar/NavBar';
 import './Profile.scss';
 
 export default function Profile() {
 
     return (
         <div className='sharedpath-profile'>
+            <NavBar/>
             <FormControl className='profile-form'>
                 <FormLabel className='profile-label'>Profile Information</FormLabel>
                 <Grid container spacing={3}>

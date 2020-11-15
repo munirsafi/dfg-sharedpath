@@ -8,14 +8,10 @@ import Login from "./app/route-login/Login";
 import Profile from "./app/route-profile/Profile";
 
 export default function App() {
-  let isLoggedIn: boolean = false;
-
   return (
     <div id="sharedpath-app">
       <Router>
         {/* @ts-ignore */}
-        <NavBar isLoggedIn={isLoggedIn} />
-
         <div className="sharedpath-page">
           <Switch>
             <Route exact path="/" component={Map} />
