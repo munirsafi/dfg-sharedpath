@@ -1,9 +1,8 @@
 
 import React from 'react';
 
-export default function Login() {
-
+export default function NewPage() {
     return (
-        <div>Hii</div>
+        <h1>PRETEND THAT THIS IS THE MAP PAGE</h1>
     );
 }
