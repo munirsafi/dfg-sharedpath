@@ -12,8 +12,7 @@ class LandZoneView(APIView):
 
     def post(self, request):
         """
-        Validates the current user, then updates their password using the new
-        given password
+        Save the landzones a user submits
 
         :author     Munir Safi
         :since      2020-11-14
@@ -35,10 +34,9 @@ class LandZoneView(APIView):
         else:
             return Response({'message': 'Cannot save landzones'}, status=status.HTTP_400_BAD_REQUEST)
 
-    def get(self, request):
+    def get(self):
         """
-        Validates the current user, then updates their password using the new
-        given password
+        Get all landzones
 
         :author     Munir Safi
         :since      2020-11-14
@@ -50,4 +48,4 @@ class LandZoneView(APIView):
 
             return Response(users)
         else:
-            return Response({'message': 'Cannot save landzones'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'Cannot get landzones'}, status=status.HTTP_400_BAD_REQUEST)
