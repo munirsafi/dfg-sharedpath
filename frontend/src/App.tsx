@@ -1,29 +1,30 @@
 import React from 'react';
-import logo from './logo.svg';
-import L from 'leaflet';
+import { BrowserRouter as Router, Switch, Route, useHistory } from 'react-router-dom';
 
-import './App.scss';
+import NavBar from './app/core/navbar/NavBar'
 
-function App() {
+import Map from './app/route-map/Map'
+import Login from './app/route-login/Login'
+import Profile from './app/route-profile/Profile';
+
+export default function App() {
+
+    let isLoggedIn: boolean = false;
+    
     return (
-        <div className="App">
-            <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo" />
-                <p>
-                    Edit <code>src/App.tsx</code> and save to reload.
-                </p>
+        <div id='sharedpath-app'>            
+            <Router>
+                { /* @ts-ignore */ }
+                <NavBar isLoggedIn={isLoggedIn} />
 
-                <a
-                    className="App-link"
-                    href="https://reactjs.org"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                Learn React
-                </a>
-            </header>
+                <div className='sharedpath-page'>
+                    <Switch>
+                        <Route exact path='/' component={Map} />
+                        <Route exact path='/login' component={Login} />
+                        <Route exact path='/profile' component={Profile} />
+                    </Switch>
+                </div>
+            </Router>
         </div>
     );
 }
-
-export default App;
