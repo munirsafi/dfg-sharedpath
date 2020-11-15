@@ -1,7 +1,5 @@
 import React from 'react';
-//import L from 'leaflet';
-import MapApp from './Map';
-//import MapDup from './MapDup';
+import { Map } from './components/Map';
 import '../scss/App.scss';
 
 
@@ -14,7 +12,7 @@ export default function App() {
                 <p>
                     Indigeneous Community Consultation Map
                 </p>
-                <MapApp></MapApp>
+                <Map />
 
                 <p>
                     Email us at &nbsp;

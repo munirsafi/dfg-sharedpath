@@ -1,39 +1,64 @@
-//@ts-nocheck
-import L from 'leaflet';
+import React from 'react';
+import { useEffect } from 'react';
 import * as turf from '@turf/turf';
+import L from 'leaflet';
 
-export default function Map() {
-var mapElement=document.getElementById("map");
-var map = L.map(mapElement).setView([43.6532, -79.3832], 11);
+import './Map.scss';
 
-L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
+export function Map() {
 
-var poly = {"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[
-[-91,54],
-[-86,53],
-[-83,52],
-[-84,50],
-[-90,51]]]}}]};
+    let leafletMap;
 
-var polyLayer = L.geoJSON(poly).addTo(map);
+    useEffect(() => {
+        const mapElement = document.getElementById('map') as HTMLElement;
+        leafletMap = L.map(mapElement).setView([43.6532, -79.3832], 11);
 
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(leafletMap);
 
-// GRID
-var bbox = polyLayer.getBounds().toBBoxString().split(',').map(Number);
-console.log(bbox);
-var cellSide = 20;
-var mask = polyLayer.toGeoJSON().features[0];
-var options = {
-    units: 'kilometers',
-    mask: mask
-};
+        const poly: any = {
+            "type": "FeatureCollection",
+            "features": [{
+                "type": "Feature",
+                "properties": {},
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [-91, 54],
+                            [-86, 53],
+                            [-83, 52],
+                            [-84, 50],
+                            [-90, 51]
+                        ]
+                    ]
+                }
+            }]
+        };
 
-var squareGrid = turf.squareGrid(bbox, cellSide, options);
+        const polyLayer = L.geoJSON(poly).addTo(leafletMap);
 
-var gridLayer = L.geoJSON(squareGrid, {color: "#008800", weight: 1, fill:0}).addTo(map);
-map.fitBounds(gridLayer.getBounds());
+        // // GRID
+        const bbox: any = polyLayer.getBounds().toBBoxString().split(',').map(Number);
+        console.log(bbox);
+        const cellSide = 20;
+        // @ts-ignore
+        const mask = polyLayer.toGeoJSON().features[0];
+        const options: any = {
+            units: 'kilometers',
+            mask: mask
+        };
 
-return(<div id="map" style="width: 600px; height: 400px"></div>)
+        const squareGrid: any = turf.squareGrid(bbox, cellSide, options);
+        const gridLayer = L.geoJSON(squareGrid, {
+            // @ts-ignore
+            color: "#008800",
+            weight: 1,
+            fill: 0
+        }).addTo(leafletMap);
+        leafletMap.fitBounds(gridLayer.getBounds());
+    }, []);
+
+    return (<div id="map"></div>);
 }
