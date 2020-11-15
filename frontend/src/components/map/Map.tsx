@@ -2,12 +2,15 @@ import React from 'react';
 import { useEffect } from 'react';
 import * as turf from '@turf/turf';
 import L from 'leaflet';
+import leafletDraw from 'leaflet-draw';
 
 import './Map.scss';
 
 export function Map() {
 
     let leafletMap;
+    // @ts-ignore
+    let drawer = leafletDraw;
 
     useEffect(() => {
         const mapElement = document.getElementById('map') as HTMLElement;
@@ -16,6 +19,16 @@ export function Map() {
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(leafletMap);
+
+        const drawnItems = new L.FeatureGroup();
+        leafletMap.addLayer(drawnItems);
+        // @ts-ignore
+        const drawControl = new L.Control.Draw({
+            edit: {
+                featureGroup: drawnItems
+            }
+        });
+        leafletMap.addControl(drawControl);
 
         const poly: any = {
             "type": "FeatureCollection",
