@@ -5,8 +5,8 @@ import L from 'leaflet';
 import leafletDraw from 'leaflet-draw';
 
 import './Map.scss';
-//@ts-nocheck
-export function Map() {
+
+export default function Map() {
 
     let leafletMap;
     // @ts-ignore
@@ -14,7 +14,7 @@ export function Map() {
 
     useEffect(() => {
         const mapElement = document.getElementById('map') as HTMLElement;
-        leafletMap = L.map(mapElement).setView([43.6532, -79.3832], 11);
+        leafletMap = L.map(mapElement, { preferCanvas: true }).setView([43.6532, -79.3832], 11);
 
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -227,5 +227,5 @@ export function Map() {
         leafletMap.fitBounds(gridLayer.getBounds());
     }, []);
 
-    return (<div id="map"></div>);
+    return <div id="map"></div>;
 }

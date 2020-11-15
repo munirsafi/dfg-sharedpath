@@ -1,5 +1,6 @@
 
 import React from 'react';
+
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
@@ -16,8 +17,8 @@ function Copyright() {
         <Typography variant="body2" color="textSecondary" align="center">
             {' If your Indigenous community has land interests in Ontario but does not have an account, please contact '}
             <Link color="primary" href="mailto:admin@sharedpath.ca">
-            admin@sharedpath.ca
-      </Link>
+                admin@sharedpath.ca
+            </Link>
         </Typography>
     );
 }

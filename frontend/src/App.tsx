@@ -1,36 +1,26 @@
 import React from 'react';
-import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Link, useHistory
-} from "react-router-dom";
-import Login from './Login'
-import NavBar from './NavBar'
-import { Map } from './components/map/Map';
-import historyWrapper from './NavBar'
-import NewPage from './NewPage'
-import './App.scss';
+import { BrowserRouter as Router, Switch, Route, useHistory } from "react-router-dom";
 
-function App() {
-    var isLoggedIn: Boolean = false;
-    var goLogIn: Boolean = false;
+import Login from './app/route-login/Login'
+import NavBar from './app/core/navbar/NavBar'
+
+import Map from './app/route-map/Map'
+
+export default function App() {
+
+    let isLoggedIn: boolean = false;
     
     return (
-        <div className="App">
-            {/* <NavBar isLoggedIn={false} history={useHistory()}/>
-            <Login/> */}
+        <div id="sharedpath-app">            
+            <Router>
+                { /* @ts-ignore */ }
+                <NavBar isLoggedIn={isLoggedIn} />
 
-            <NavBar isLoggedIn={true} history={useHistory()}/>
-            <NewPage/>
-            <Map />
-            
-           {/*} <Router>
                 <Switch>
-                    <Route path="/" component={NewPage}/>
-                    <Route path="/login" component={Login}/>
+                    <Route exact path="/" component={Map} />
+                    <Route exact path="/login" component={Login} />
                 </Switch>
-    </Router>*/}
-        </div >
+            </Router>
+        </div>
     );
 }
