@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import Login from './Login'
 import NavBar from './NavBar'
+import { Map } from './components/map/Map';
 import historyWrapper from './NavBar'
 import NewPage from './NewPage'
 import './App.scss';
@@ -22,6 +23,7 @@ function App() {
 
             <NavBar isLoggedIn={true} history={useHistory()}/>
             <NewPage/>
+            <Map />
             
            {/*} <Router>
                 <Switch>
@@ -32,5 +34,3 @@ function App() {
         </div >
     );
 }
-
-export default App;
