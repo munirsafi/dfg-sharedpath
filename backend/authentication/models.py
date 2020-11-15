@@ -28,6 +28,7 @@ class AuthUser(AbstractUser):
     community_phone = models.CharField(max_length=125, blank=True)
     community_email = models.CharField(max_length=125, blank=True)
     community_link = models.CharField(max_length=750, blank=True)
+    landzones = models.JSONField(default=dict)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -38,4 +39,4 @@ class AuthUser(AbstractUser):
         return self.email
 
     def get_editable_fields(self, **kwargs):
-        return ['first_name', 'last_name', 'phone_number', 'community', 'community_role', 'community_phone', 'community_email', 'community_link']
+        return ['first_name', 'last_name', 'phone_number', 'community', 'community_role', 'community_phone', 'community_email', 'community_link', 'landzones']

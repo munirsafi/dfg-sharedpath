@@ -8,7 +8,6 @@ from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 router = routers.DefaultRouter()
-router.register(r'landzones', LandZoneView, basename='landzones')
 
 urlpatterns = [
     path('api/', include(router.urls)),
@@ -16,5 +15,6 @@ urlpatterns = [
     path('auth/update-profile', UpdateProfileView.as_view(), name='update_profile'),
     path('auth/token/', AuthUserObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('landzones', LandZoneView.as_view(), name='landzones'),
     path('admin/', admin.site.urls),
 ]
