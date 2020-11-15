@@ -1,0 +1,28 @@
+.sharedpath-profile {
+    height: 100%;
+    overflow: auto;
+
+    .profile-form {
+        display: flex;
+        margin: auto;
+        margin-top: 25px;
+        width: 85%;
+
+        .profile-label {
+            font-size: 1.25rem;
+            margin: 25px 0;
+        }
+    }
+
+    .submit-button {
+        margin: 35px 0;
+    }
+
+    .section-split {
+        background: #c4c4c4;
+        border: 0;
+        height: 1px;
+        margin: 25px 0;
+        width: 100%;
+    }
+}

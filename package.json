@@ -6,6 +6,7 @@
   "dependencies": {
     "@turf/turf": "^5.1.6",
     "@types/react": "^16.9.56",
+    "axios": "^0.21.0",
     "leaflet": "^1.7.1",
     "leaflet-draw": "^1.0.4",
     "prop-types": "^15.7.2",
