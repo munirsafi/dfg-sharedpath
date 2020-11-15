@@ -8,6 +8,8 @@ import L from 'leaflet';
 import leafletDraw from 'leaflet-draw';
 
 import './Map.scss';
+import Authentication from '../../services/Authentication';
+
 export default function Map() {
 
     let leafletMap;
@@ -24,22 +26,42 @@ export default function Map() {
 
         const drawnItems = new L.FeatureGroup();
         leafletMap.addLayer(drawnItems);
-        // @ts-ignore
-        const drawControl = new L.Control.Draw({
-            edit: {
-                featureGroup: drawnItems
-            }
-        });
-        leafletMap.addControl(drawControl);
+        if (Authentication.status() === true) {
+          const drawControl = new L.Control.Draw({
+              position: 'bottomright',
+              draw: {
+                  marker: false,
+                  circlemarker: false,
+                  circle: false,
+                  rectangle: false,
+                  polyline: false
+              },
+              edit: {
+                  featureGroup: drawnItems
+              }
+          });
+          leafletMap.addControl(drawControl);
+      }
 
-        leafletMap.on('draw:created', function (e) {
-            const type = (e as L.DrawEvents.Created).layerType,
-            layer = (e as L.DrawEvents.Created).layer;
 
-            
-      // Do whatever else you need to. (save to db, add to map etc)
-      drawnItems.addLayer(layer);
-  });
+
+      leafletMap.on('draw:created', function (e) {
+        const type = (e as L.DrawEvents.Created).layerType,
+        layer = (e as L.DrawEvents.Created).layer;
+
+        if (type === 'polygon') {
+            // here you got the polygon points
+            // @ts-ignore
+            var points = layer._latlngs;
+            console.log(points);
+
+            // here you can get it in geojson format
+            var geojson = layer.toGeoJSON();
+            console.log(geojson);
+        }
+        // Do whatever else you need to. (save to db, add to map etc)
+  drawnItems.addLayer(layer);
+});
 
         const poly: any = {
             "type": "FeatureCollection",
