@@ -24,6 +24,14 @@ export default function Map() {
         leafletMap.addLayer(drawnItems);
         // @ts-ignore
         const drawControl = new L.Control.Draw({
+            position: 'bottomright',
+            draw: {
+                marker: false,
+                circlemarker: false,
+                circle: false,
+                rectangle: false,
+                polyline: false
+            },
             edit: {
                 featureGroup: drawnItems
             }
@@ -33,7 +41,18 @@ export default function Map() {
         leafletMap.on('draw:created', function (e) {
             const type = (e as L.DrawEvents.Created).layerType,
             layer = (e as L.DrawEvents.Created).layer;
-      // Do whatever else you need to. (save to db, add to map etc)
+
+            if (type === 'polygon') {
+                // here you got the polygon points
+                // @ts-ignore
+                var points = layer._latlngs;
+                console.log(points);
+
+                // here you can get it in geojson format
+                var geojson = layer.toGeoJSON();
+                console.log(geojson);
+            }
+            // Do whatever else you need to. (save to db, add to map etc)
       drawnItems.addLayer(layer);
   });
 
