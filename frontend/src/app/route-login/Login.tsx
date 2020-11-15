@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, ChangeEvent } from 'react';
 
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -11,6 +11,8 @@ import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 
 import './Login.scss'
+
+import Authentication from '../../services/Authentication';
 
 function Copyright() {
     return (
@@ -25,6 +27,14 @@ function Copyright() {
 
 export default function Login() {
 
+    const [email, setEmail] = useState<string | undefined>();
+    const [password, setPassword] = useState<string | undefined>();
+
+    const submitLogin = async () => {
+        const status = await Authentication.login(email as string, password as string);
+        console.log(status);
+    }
+
     return (
         <div className="sharedpath-login">
             <Container className="tm32" component="main" maxWidth="xs">
@@ -35,43 +45,44 @@ export default function Login() {
                             Login
                     </Typography>
                     </div>
-                    <form noValidate>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12}>
-                                <TextField
-                                    variant="outlined"
-                                    required
-                                    fullWidth
-                                    id="email"
-                                    label="Email Address"
-                                    name="email"
-                                    autoComplete="email"
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    variant="outlined"
-                                    required
-                                    fullWidth
-                                    name="password"
-                                    label="Password"
-                                    type="password"
-                                    id="password"
-                                    autoComplete="current-password"
-                                />
-                            </Grid>
-                        </Grid>
-                        <div className="pad">
-                            <Button
-                                type="submit"
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                required
                                 fullWidth
-                                variant="contained"
-                                color="primary"
-                            >
-                                Login
-                        </Button>
-                        </div>
-                    </form>
+                                id="email"
+                                label="Email Address"
+                                name="email"
+                                autoComplete="email"
+                                onChange={(event: ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                required
+                                fullWidth
+                                name="password"
+                                label="Password"
+                                type="password"
+                                id="password"
+                                autoComplete="current-password"
+                                onChange={(event: ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
+                            />
+                        </Grid>
+                    </Grid>
+                    <div className="pad">
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            color="primary"
+                            onClick={() => submitLogin()}
+                        >
+                            Login
+                    </Button>
+                    </div>
                 </div>
                 <Box mt={5}>
                     <Copyright />
