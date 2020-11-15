@@ -1,31 +1,12 @@
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-
-@csrf_exempt
-def root(request):
-    """
-    Checks the HTTP method of the incoming request and passes it to the
-    appropriate method
-
-    :param request Django request object
-    :returns JSON response
-    """
-    if request.method == 'GET':
-        return GET(request)
-
-    elif request.method == 'POST':
-        return POST(request)
-
-    else:
-        return HttpResponse(status=404, content='Invalid request method used')
+from rest_framework.viewsets import ViewSet
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 
-def POST(request):
-    """
-    """
-    return JsonResponse({ 'hello': 'world'})
+class LandZoneView(ViewSet):
+    permission_classes = [IsAuthenticated]
 
-def GET(request):
-    """
-    """
-    return JsonResponse({ 'hello': 'world' })
+    def list(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
