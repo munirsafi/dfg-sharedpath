@@ -1,13 +1,13 @@
-import React, { useEffect } from 'react';
+//@ts-nocheck
 
+
+import React from 'react';
+import { useEffect } from 'react';
+import * as turf from '@turf/turf';
 import L from 'leaflet';
 import leafletDraw from 'leaflet-draw';
 
-import * as turf from '@turf/turf';
-
 import './Map.scss';
-import Authentication from '../../services/Authentication';
-
 export default function Map() {
 
     let leafletMap;
@@ -16,7 +16,7 @@ export default function Map() {
 
     useEffect(() => {
         const mapElement = document.getElementById('map') as HTMLElement;
-        leafletMap = L.map(mapElement, { preferCanvas: true }).setView([43.6532, -79.3832], 11);
+        leafletMap = L.map(mapElement).setView([43.6532, -79.3832], 11);
 
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -24,39 +24,20 @@ export default function Map() {
 
         const drawnItems = new L.FeatureGroup();
         leafletMap.addLayer(drawnItems);
-
-        if (Authentication.status() === true) {
-            const drawControl = new L.Control.Draw({
-                position: 'bottomright',
-                draw: {
-                    marker: false,
-                    circlemarker: false,
-                    circle: false,
-                    rectangle: false,
-                    polyline: false
-                },
-                edit: {
-                    featureGroup: drawnItems
-                }
-            });
-            leafletMap.addControl(drawControl);
-        }
+        // @ts-ignore
+        const drawControl = new L.Control.Draw({
+            edit: {
+                featureGroup: drawnItems
+            }
+        });
+        leafletMap.addControl(drawControl);
 
         leafletMap.on('draw:created', function (e) {
             const type = (e as L.DrawEvents.Created).layerType,
             layer = (e as L.DrawEvents.Created).layer;
 
-            if (type === 'polygon') {
-                // here you got the polygon points
-                // @ts-ignore
-                var points = layer._latlngs;
-                console.log(points);
-
-                // here you can get it in geojson format
-                var geojson = layer.toGeoJSON();
-                console.log(geojson);
-            }
-            // Do whatever else you need to. (save to db, add to map etc)
+            
+      // Do whatever else you need to. (save to db, add to map etc)
       drawnItems.addLayer(layer);
   });
 
@@ -158,8 +139,6 @@ export default function Map() {
         const polyLayer = L.geoJSON(poly);
 
         const poly1: any = {
-            "type": "FeatureCollection",
-            "features": [{
                 "type": "Feature",
                 "properties": {},
                 "geometry": {
@@ -174,12 +153,9 @@ export default function Map() {
                         ]
                     ]
                 }
-            }]
-        };
+            };
 
         const poly2: any = {
-            "type": "FeatureCollection",
-            "features": [{
                 "type": "Feature",
                 "properties": {},
                 "geometry": {
@@ -193,8 +169,7 @@ export default function Map() {
                         ]
                     ]
                 }
-            }]
-        };
+            };
 
 
         // // GRID
@@ -225,17 +200,6 @@ export default function Map() {
             }).bindPopup("Example Nation 1 </br> Nation1@gmail.com").
             addTo(leafletMap);
             
-            // for (const grid of squareGrid)
-            //     {const areOverlapping =  turf.booleanOverlap(poly1,grid);
-            //         if (areOverlapping){
-            //             const flagCheck=true;
-            //             break;
-            //         }
-            //     }
-            // for each polygon in squaregrid feature collection:
-                
-            //     if turf.booleanOverlap(polyNation1,gridbox)
-            //     then color=blue;
 
             const polyNation2 = L.geoJSON(poly2,
                 {// @ts-ignore
@@ -245,10 +209,48 @@ export default function Map() {
                 }).bindPopup("Example Nation 2 </br> Nation2@gmail.com").
                 addTo(leafletMap);
 
+                var coords = [];
+                var i=1;
+
+                 const GridAreas = L.geoJson(squareGrid, {
+                      style: function (feature) {
+                          return {
+                              stroke: false,
+                              fillColor: 'FFFFFF',
+                              fillOpacity: 0
+                          };
+                      },
+                      onEachFeature: function (feature, layer) {
+
+                          var popupOptions = {maxWidth: 200};
+                          feature.properties.ObjectID=i;
+
+                          var overlap = turf.booleanOverlap(poly1,feature);
+                          var contains = turf.booleanContains(poly1,feature);
+
+                          if (overlap || contains) {feature.properties.Nation1='yes'};
+
+                          var overlap = turf.booleanOverlap(poly2,feature);
+                          var contains = turf.booleanContains(poly2,feature);
+
+                          if (overlap || contains) {feature.properties.Nation2='yes'};
+
+                          var longitude = parseFloat(feature.geometry.coordinates[0][0][0]).toFixed(3);
+                          var latitude = parseFloat(feature.geometry.coordinates[0][0][1]).toFixed(3);
+
+                          layer.bindPopup("<b>Coordinates: </b> " + longitude+ ', ' + latitude + "<br> <b>Type:</b> " + feature.geometry.type +
+                              "<br><b>Nation 1:</b> "+feature.properties.Nation1 +
+                              "<br><b>Nation 2:</b> "+feature.properties.Nation2 +
+                              '<br> <b>ObjectID:</b> ' + feature.properties.ObjectID,popupOptions);
+                          i=i+1
+                      }
+                  }).addTo(leafletMap);
+              
+
         L.control.scale().addTo(leafletMap);
         
         leafletMap.fitBounds(gridLayer.getBounds());
     }, []);
 
-    return <div id="map"></div>;
+    return (<div id="map"></div>);
 }
