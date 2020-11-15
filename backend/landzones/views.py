@@ -1,3 +1,4 @@
+from authentication.serializers import UserSerializer
 from django.contrib.auth import get_user_model
 
 from rest_framework import status
@@ -34,7 +35,7 @@ class LandZoneView(APIView):
         else:
             return Response({'message': 'Cannot save landzones'}, status=status.HTTP_400_BAD_REQUEST)
 
-    def get(self):
+    def get(self, request):
         """
         Get all landzones
 
@@ -45,7 +46,8 @@ class LandZoneView(APIView):
         if request.headers.get('Authorization', None) is not None:
             AuthUser = get_user_model()
             users = AuthUser.objects.all()
+            serializer = UserSerializer(users, many=True)
 
-            return Response(users)
+            return Response(serializer.data)
         else:
             return Response({'message': 'Cannot get landzones'}, status=status.HTTP_400_BAD_REQUEST)
