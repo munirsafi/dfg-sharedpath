@@ -8,8 +8,8 @@ import leafletDraw from 'leaflet-draw';
 import './Map.scss';
 import { ontarioBoundary } from './OntarioBoundary';
 
-import NavBar from '../core/navbar/NavBar';
 import Authentication from '../../services/Authentication';
+import NavBar from '../core/navbar/NavBar';
 
 export default function Map() {
 
@@ -178,5 +178,10 @@ export default function Map() {
         leafletMap.fitBounds(gridLayer.getBounds());
     }, []);
 
-    return (<div id="map"></div>);
+    return (
+        <div style={{ width: 100 + '%', height: 100 + '%' }}>
+            <NavBar />
+            <div id="map"></div>
+        </div>
+    );
 }

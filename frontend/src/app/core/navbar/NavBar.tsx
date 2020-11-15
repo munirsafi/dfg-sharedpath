@@ -10,12 +10,45 @@ import IconButton from '@material-ui/core/IconButton';
 import { useHistory } from "react-router-dom";
 
 import './NavBar.scss'
+import Authentication from '../../../services/Authentication';
 
 export default function NavBar(props: any) {
-
-    const [loginText, setLoginText] = useState(props.isLoggedIn ? 'Logout' : 'Login');
+    
+    const [isLoggedIn, setIsLoggedIn] = useState(Authentication.status());
 
     const history = useHistory();
+    let buttons;
+
+    function logout () {
+        Authentication.logout();
+        history.push('/');
+        window.location.reload();
+        alert("You will be logged out now");
+    }
+
+    if (isLoggedIn) {
+        buttons = <div>
+            <Button
+                onClick={() => history.push('/profile')}
+                color="inherit"
+            >
+                Profile Page
+        </Button>
+            <Button
+                onClick={() => logout()}
+                color="inherit"
+            >
+                Logout
+            </Button>
+        </div>
+    } else {
+        buttons = <Button
+            onClick={() => history.push('/login')}
+            color="inherit"
+        >
+            Login
+        </Button>
+    }
 
     return (
         <div className="header">
@@ -30,13 +63,7 @@ export default function NavBar(props: any) {
                     >
                         SP
                     </IconButton>
-
-                    <Button
-                        onClick={() => history.push('/login')}
-                        color="inherit"
-                    >
-                        {loginText}
-                    </Button>
+                    {buttons}
                 </Toolbar>
             </AppBar>
         </div>

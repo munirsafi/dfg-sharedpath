@@ -3,6 +3,7 @@ import { AxiosResponse } from 'axios';
 
 import { IHeader } from '../interfaces/header';
 import { Token } from '../interfaces/token';
+import { IUserData } from '../interfaces/userdata';
 
 const API_URL: string = 'http://localhost:8000';
 
@@ -58,6 +59,106 @@ function generateHeaders(authNeeded?: boolean) : IHeader {
 }
 
 const Authentication = {
+    /**
+     * @summary     Change user password, and confirm new password is as the
+     *              user expects
+     * 
+     * @author      Munir Safi
+     * @since       2020-11-15
+     * @param       password New user password
+     * @param       confirmPassword New user password that matches the first
+     * @returns     True if successful, false if not
+     */
+    changePassword: async (password: string, confirmPassword: string): Promise<boolean> => {
+        if (password !== confirmPassword) {
+            return false;
+        }
+
+        const data = {
+            'password': password
+        };
+
+        const options = {
+            headers: generateHeaders(true)
+        };
+
+        try {
+            const response: AxiosResponse<Token> = await axios.post(`${API_URL}/auth/change-password`, data, options);
+            if (response.data.access && response.data.refresh) {
+                localStorage.setItem('access_token', response.data.access);
+                localStorage.setItem('refresh_token', response.data.refresh);
+
+                return true
+            }
+        } catch (err) {
+            if (localStorage.getItem('DEBUG') === '*') {
+                console.error('An error occurred when attempting to change password: ', err);
+            }
+            return false;
+        }
+
+        return false;
+    },
+
+    /**
+     * @summary     Change user password, and confirm new password is as the
+     *              user expects
+     * 
+     * @author      Munir Safi
+     * @since       2020-11-15
+     * @param       password New user password
+     * @param       confirmPassword New user password that matches the first
+     * @returns     True if successful, false if not
+     */
+    changeInfo: async (data: any) : Promise<boolean> => {
+        const options = {
+            headers: generateHeaders(true)
+        };
+
+        try {
+            const response: AxiosResponse<Token> = await axios.post(`${API_URL}/auth/update-profile`, data, options);
+            if (response.data.access && response.data.refresh) {
+                localStorage.setItem('access_token', response.data.access);
+                localStorage.setItem('refresh_token', response.data.refresh);
+
+                return true
+            }
+        } catch (err) {
+            if (localStorage.getItem('DEBUG') === '*') {
+                console.error('An error occurred when attempting to change info: ', err);
+            }
+            return false;
+        }
+
+        return false;
+    },
+
+    /**
+     * @summary     Gets the logged in user's information
+     * 
+     * @author      Munir Safi
+     * @since       2020-11-15
+     * @returns     User information in JSON form
+     */
+    getInfo: () : IUserData | null => {
+        const token = localStorage.getItem('access_token');
+
+        if (token !== '' && token !== null) {
+            const infoPayload = token.split('.')[1];
+            const data = window.atob(infoPayload);
+            const info = JSON.parse(data);
+
+            delete info.user_id;
+            delete info.jti;
+            delete info.exp;
+            delete info.token_type;
+
+            return info;
+        }
+
+        return null;
+    },
+
     /**
      * @summary     Given an email and password, attempts to login the user
      *              and fetch their JWT

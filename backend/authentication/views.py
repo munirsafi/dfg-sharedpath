@@ -32,9 +32,13 @@ class AuthUserToken(RefreshToken):
         token['email'] = user.email
         token['first_name'] = user.first_name
         token['last_name'] = user.last_name
-        token['phone'] = user.phone_number
+        token['phone_number'] = user.phone_number
+
         token['community'] = user.community
         token['community_role'] = user.community_role
+        token['community_phone'] = user.community_phone
+        token['community_email'] = user.community_email
+        token['community_link'] = user.community_link
 
         return token
 
