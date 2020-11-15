@@ -116,7 +116,7 @@ const Authentication = {
      */
     status: () : boolean => {
         const accessToken = localStorage.getItem('access_token');
-        if (accessToken !== '') {
+        if (accessToken !== '' && accessToken !== null) {
             return true;
         }
 
