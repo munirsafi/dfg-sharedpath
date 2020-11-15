@@ -2,7 +2,7 @@ import axios from "axios";
 import { AxiosResponse } from "axios";
 import { Token } from "../models/token";
 
-const API_URL: string = "http://localhost:8000/api/token";
+const API_URL: string = "http://localhost:8000/auth/token";
 
 const login = async (email: string, password: string): Promise<void> => {
   const response: AxiosResponse<Token> = await axios.post(
