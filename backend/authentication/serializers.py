@@ -1,4 +1,4 @@
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class AuthUserObtainPairSerializer(TokenObtainPairSerializer):
     """
@@ -13,22 +13,6 @@ class AuthUserObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-
-        token['email'] = user.email
-        token['first_name'] = user.first_name
-        token['last_name'] = user.last_name
-        token['phone'] = user.phone_number
-        token['community'] = user.community
-        token['community_role'] = user.community_role
-
-        return token
-
-
-class AuthUserRefreshSerializer(TokenRefreshSerializer):
-
-    @classmethod
-    def validate(cls, user):
-        token = super().validate(user)
 
         token['email'] = user.email
         token['first_name'] = user.first_name

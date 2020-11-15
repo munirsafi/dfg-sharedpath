@@ -6,9 +6,9 @@ from rest_framework.views import APIView
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.tokens import RefreshToken, Token
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import AuthUserObtainPairSerializer, AuthUserRefreshSerializer
+from .serializers import AuthUserObtainPairSerializer
 
 class AuthUserObtainPairView(TokenObtainPairView):
     """
@@ -19,15 +19,16 @@ class AuthUserObtainPairView(TokenObtainPairView):
     """
     serializer_class = AuthUserObtainPairSerializer
 
-class AuthUserRefreshView(TokenRefreshView):
-    serializer_class = AuthUserRefreshSerializer
-
-class AuthUserToken(Token):
+class AuthUserToken(RefreshToken):
 
     @classmethod
     def for_user(cls, user):
-        token = super().for_user(user)
+        """
+        Returns an authorization token for the given user that will include
+        the custom payload data with the user information
+        """
 
+        token = cls()
         token['email'] = user.email
         token['first_name'] = user.first_name
         token['last_name'] = user.last_name
@@ -95,8 +96,8 @@ class UpdateProfileView(APIView):
 
             user.save()
 
-            refresh = RefreshToken.for_user(user)
+            refresh = AuthUserToken.for_user(user)
 
-            return Response({'refresh': str(refresh), 'access': str(refresh.access_token)})
+            return Response({'refresh': str(refresh), 'access': str(refresh.access_token) })
         else:
             return Response({ 'message': 'Cannot update profile if no user is active' }, status=status.HTTP_400_BAD_REQUEST)
