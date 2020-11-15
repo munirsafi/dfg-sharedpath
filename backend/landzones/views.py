@@ -9,4 +9,3 @@ class LandZoneView(ViewSet):
     def list(self, request):
         content = {'message': 'Hello, World!'}
         return Response(content)
-

@@ -11,13 +11,6 @@ import { useHistory } from "react-router-dom";
 
 import './NavBar.scss'
 
-
-interface Props {
-    isLoggedIn: boolean;
-    history: any;
-}
-
-
 export default function NavBar(props: any) {
 
     const [loginText, setLoginText] = useState(props.isLoggedIn ? 'Logout' : 'Login');

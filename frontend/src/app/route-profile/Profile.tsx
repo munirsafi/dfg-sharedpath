@@ -18,7 +18,6 @@ export default function Profile() {
                     <Grid item xs={12} sm={6}>
                         <TextField
                             label='First Name'
-                            id='outlined-margin-none'
                             defaultValue='First'
                             variant='outlined'
                             fullWidth
@@ -27,7 +26,6 @@ export default function Profile() {
                     <Grid item xs={12} sm={6}>
                         <TextField
                             label='Last Name'
-                            id='outlined-margin-none'
                             defaultValue='Last'
                             variant='outlined'
                             fullWidth
@@ -36,7 +34,6 @@ export default function Profile() {
                     <Grid item xs={12}>
                         <TextField
                             label='Email'
-                            id='outlined-margin-none'
                             defaultValue='email@email.com'
                             helperText="You cannot change your email address. If you'd like to update your email, please contact a SharedPath administrator."
                             variant='outlined'
@@ -47,7 +44,6 @@ export default function Profile() {
                     <Grid item xs={12}>
                         <TextField
                             label='Phone Number'
-                            id='outlined-margin-none'
                             defaultValue='+9999999999'
                             variant='outlined'
                             fullWidth
@@ -64,7 +60,6 @@ export default function Profile() {
                     <Grid item xs={12}>
                         <TextField
                             label='Community Name'
-                            id='outlined-margin-none'
                             variant='outlined'
                             fullWidth
                         />
@@ -72,7 +67,6 @@ export default function Profile() {
                     <Grid item xs={12}>
                         <TextField
                             label='Community Role'
-                            id='outlined-margin-none'
                             variant='outlined'
                             fullWidth
                         />
@@ -88,7 +82,6 @@ export default function Profile() {
                     <Grid item xs={12}>
                         <TextField
                             label='Current Password'
-                            id='outlined-margin-none'
                             variant='outlined'
                             fullWidth
                         />
@@ -96,7 +89,6 @@ export default function Profile() {
                     <Grid item xs={12} sm={6}>
                         <TextField
                             label='New Password'
-                            id='outlined-margin-none'
                             variant='outlined'
                             fullWidth
                         />
@@ -104,7 +96,6 @@ export default function Profile() {
                     <Grid item xs={12} sm={6}>
                         <TextField
                             label='Confirm New Password'
-                            id='outlined-margin-none'
                             variant='outlined'
                             fullWidth
                         />

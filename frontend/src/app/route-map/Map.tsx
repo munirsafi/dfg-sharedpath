@@ -26,7 +26,6 @@ export default function Map() {
         leafletMap.addLayer(drawnItems);
 
         if (Authentication.status() === true) {
-            console.log(Authentication.status());
             const drawControl = new L.Control.Draw({
                 position: 'bottomright',
                 draw: {
