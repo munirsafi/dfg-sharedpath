@@ -6,12 +6,6 @@ import json
 
 from .managers import AuthUserManager
 
-
-class LandZoneField(models.JSONField):
-    def prepare_value(self, value):
-        return json.dumps(value.__dict__)
-
-
 class AuthUser(AbstractUser):
     """
     SharedPath Map Application's custom user model; includes new attributes
@@ -36,7 +30,6 @@ class AuthUser(AbstractUser):
     community_phone = models.CharField(max_length=125, blank=True)
     community_email = models.CharField(max_length=125, blank=True)
     community_link = models.CharField(max_length=750, blank=True)
-    landzones = models.JSONField(default=dict)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
