@@ -28,12 +28,3 @@ class AuthUserObtainPairSerializer(TokenObtainPairSerializer):
         token['community_link'] = user.community_link
 
         return token
-
-
-class UserSerializer(serializers.Serializer):
-    community = serializers.CharField()
-    community_role = serializers.CharField()
-    community_phone = serializers.CharField()
-    community_email = serializers.CharField()
-    community_link = serializers.CharField()
-    landzones = serializers.JSONField()
