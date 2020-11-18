@@ -2,7 +2,7 @@
 import React from 'react';
 import { useEffect } from 'react';
 import * as turf from '@turf/turf';
-import L from 'leaflet';
+import L, { polygon } from 'leaflet';
 import leafletDraw from 'leaflet-draw';
 
 import './Map.scss';
@@ -15,6 +15,57 @@ export default function Map() {
 
     let leafletMap;
     let drawer = leafletDraw;
+
+    const hideSidebar = () => {
+        const sideBar = document.querySelector('.sidebar');
+        sideBar.style.display = 'none';
+    };
+
+    const polyGroups = [{
+        userID: 1,
+        geoJSON: {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [-91, 54],
+                        [-86, 53],
+                        [-83, 52],
+                        [-84, 50],
+                        [-90, 51]
+                    ]
+                ]
+            }
+        },
+        communityInfo: {
+            community: 'Testing',
+            community_email: 'test@test.com'
+        }
+    }, {
+        userID: 2,
+        geoJSON: {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [-87, 52],
+                        [-84, 54],
+                        [-84.5, 55],
+                        [-89, 53]
+                    ]
+                ]
+            },
+        },
+        communityInfo: {
+            community: 'Testing 2',
+            community_phone: '+9999999999',
+            community_link: 'https://google.ca/'
+        }
+    }];
 
     useEffect(() => {
         const mapElement = document.getElementById('map') as HTMLElement;
@@ -60,7 +111,6 @@ export default function Map() {
 
         const polyLayer = L.geoJSON(ontarioBoundary);
 
-
         // // GRID for all of Ontario
         const bbox: any = polyLayer.getBounds().toBBoxString().split(',').map(Number);
         const cellSide = 20;
@@ -78,60 +128,13 @@ export default function Map() {
             fill: 0
         }).addTo(leafletMap);
 
-
-        const polyGroups = [{
-            userID: 1,
-            geoJSON: {
-                "type": "Feature",
-                "properties": {},
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [
-                        [
-                            [-91, 54],
-                            [-86, 53],
-                            [-83, 52],
-                            [-84, 50],
-                            [-90, 51]
-                        ]
-                    ]
-                }
-            },
-            communityInfo: {
-                community: 'Testing',
-                community_email: 'test@test.com'
-            }
-            }, {
-            userID: 2,
-            geoJSON: {
-                "type": "Feature",
-                "properties": {},
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [
-                        [
-                            [-87, 52],
-                            [-84, 54],
-                            [-84.5, 55],
-                            [-89, 53]
-                        ]
-                    ]
-                },
-            },
-            communityInfo: {
-                community: 'Testing 2',
-                community_phone: '+9999999999',
-                community_link: 'https://google.ca/'
-            }
-        }];
+        
 
         for (let area of polyGroups) {
             L.geoJSON(area.geoJSON, {
-                color: '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
-                weight: 0.5,
-                fill: 0.2
-            }).bindPopup(`${area.communityInfo.community_name} <br/> ${area.communityInfo.community_email}`)
-            .addTo(leafletMap);
+                weight: 0,
+                fill: 0
+            }).addTo(leafletMap);
         }
 
         const GridAreas = L.geoJson(squareGrid, {
@@ -168,8 +171,22 @@ export default function Map() {
                     if (community.community_link) popupText += `Policy Link: <a href='${community.community_link}' target='_blank'>${community.community_link}</a><br/>`;
                     if (i !== l - 1) popupText += '<br/><hr/><br/>';
                 }
-                if (popupText !== '') layer.bindPopup(popupText);
+                if (popupText !== '') {
+                    layer.bindPopup(popupText);
+
+                    layer.on('mouseover', function (e) {
+                        this.openPopup();
+                    });
+
+                    layer.on('mouseout', function (e) {
+                        this.closePopup();
+                    });
+                }
                  
+                layer.on('click', () => {
+                    const sideBar = document.querySelector('.sidebar');
+                    sideBar.style.display = 'block';
+                });
             }
         }).addTo(leafletMap);
             
@@ -181,6 +198,24 @@ export default function Map() {
     return (
         <div style={{ width: 100 + '%', height: 100 + '%' }}>
             <NavBar />
+            <div className='sidebar'>
+                <div className='close-sidebar' onClick={() => hideSidebar()}></div>
+                <div className='sidebar-title'>Ontario Native Groups</div>
+                { polyGroups.map((group, index) => {
+                    return (<div className='community-info'>
+                        <span className='name'>{group.communityInfo.community}</span>
+                        { group.communityInfo.community_email ? 
+                            <span>Email Address: <a href={'mailto:' +group.communityInfo.community_email}>{group.communityInfo.community_email}</a></span>
+                        : null }
+                        { group.communityInfo.community_phone ?
+                            <span>Phone Number: < a href={'tel:' + group.communityInfo.community_phone}>{group.communityInfo.community_phone}</a></span>
+                        : null }
+                        { group.communityInfo.community_link ?
+                            <span>Policy Link: <a href={group.communityInfo.community_link}>{group.communityInfo.community_link}</a></span>
+                        : null }
+                    </div>);
+                })}
+            </div>
             <div id="map"></div>
         </div>
     );
