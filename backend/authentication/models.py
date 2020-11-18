@@ -39,4 +39,4 @@ class AuthUser(AbstractUser):
         return self.email
 
     def get_editable_fields(self, **kwargs):
-        return ['first_name', 'last_name', 'phone_number', 'community', 'community_role', 'community_phone', 'community_email', 'community_link', 'landzones']
+        return ['first_name', 'last_name', 'phone_number', 'community', 'community_role', 'community_phone', 'community_email', 'community_link']
