@@ -16,28 +16,21 @@ const API_URL: string = 'http://localhost:8000';
  */
 async function refreshToken(): Promise<void> {
     const options = {
-        headers: generateHeaders(true),
+        headers: generateHeaders(true)
     };
 
     const data = {
-        refresh: localStorage.getItem('refresh_token'),
+        'refresh': localStorage.getItem('refresh_token')
     };
 
     try {
-        const response: AxiosResponse<Token> = await axios.post(
-            `${API_URL}/refresh`,
-            data,
-            options
-        );
+        const response: AxiosResponse<Token> = await axios.post(`${API_URL}/refresh`, data, options);
         if (response.data.access) {
             localStorage.setItem('access_token', response.data.access);
         }
     } catch (err) {
         if (localStorage.getItem('DEBUG') === '*') {
-            console.error(
-                'An error occurred when refreshing access token: ',
-                err
-            );
+            console.error('An error occurred when refreshing access token: ', err);
         }
     }
 }
@@ -50,9 +43,9 @@ async function refreshToken(): Promise<void> {
  * @param       authNeeded Indicate if this request needs authorization headers
  * @returns     HTTP header object
  */
-export function generateHeaders(authNeeded?: boolean): IHeader {
+function generateHeaders(authNeeded?: boolean): IHeader {
     const headers: IHeader = {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
     };
     if (authNeeded && authNeeded === true) {
         const accessToken = localStorage.getItem('access_token');
@@ -76,28 +69,21 @@ const Authentication = {
      * @param       confirmPassword New user password that matches the first
      * @returns     True if successful, false if not
      */
-    changePassword: async (
-        password: string,
-        confirmPassword: string
-    ): Promise<boolean> => {
+    changePassword: async (password: string, confirmPassword: string): Promise<boolean> => {
         if (password !== confirmPassword) {
             return false;
         }
 
         const data = {
-            password: password,
+            password: password
         };
 
         const options = {
-            headers: generateHeaders(true),
+            headers: generateHeaders(true)
         };
 
         try {
-            const response: AxiosResponse<Token> = await axios.post(
-                `${API_URL}/auth/change-password`,
-                data,
-                options
-            );
+            const response: AxiosResponse<Token> = await axios.post(`${API_URL}/auth/change-password`, data, options);
             if (response.data.access && response.data.refresh) {
                 localStorage.setItem('access_token', response.data.access);
                 localStorage.setItem('refresh_token', response.data.refresh);
@@ -106,10 +92,7 @@ const Authentication = {
             }
         } catch (err) {
             if (localStorage.getItem('DEBUG') === '*') {
-                console.error(
-                    'An error occurred when attempting to change password: ',
-                    err
-                );
+                console.error( 'An error occurred when attempting to change password: ', err);
             }
             return false;
         }
@@ -129,15 +112,11 @@ const Authentication = {
      */
     changeInfo: async (data: any): Promise<boolean> => {
         const options = {
-            headers: generateHeaders(true),
+            headers: generateHeaders(true)
         };
 
         try {
-            const response: AxiosResponse<Token> = await axios.post(
-                `${API_URL}/auth/update-profile`,
-                data,
-                options
-            );
+            const response: AxiosResponse<Token> = await axios.post(`${API_URL}/auth/update-profile`, data, options);
             if (response.data.access && response.data.refresh) {
                 localStorage.setItem('access_token', response.data.access);
                 localStorage.setItem('refresh_token', response.data.refresh);
@@ -146,10 +125,7 @@ const Authentication = {
             }
         } catch (err) {
             if (localStorage.getItem('DEBUG') === '*') {
-                console.error(
-                    'An error occurred when attempting to change info: ',
-                    err
-                );
+                console.error('An error occurred when attempting to change info: ', err);
             }
             return false;
         }
@@ -188,7 +164,7 @@ const Authentication = {
      *              and fetch their JWT
      *
      * @since       2020-11-14
-     * @author      Xuankai Chen, Munir Safi
+     * @author      Munir Safi, Xuankai Chen
      * @param       email User's email address
      * @param       password User's plaintext password
      * @returns     True if user login attempt was successful, false if not
@@ -196,19 +172,15 @@ const Authentication = {
     login: async (email: string, password: string): Promise<boolean> => {
         const data = {
             email: email,
-            password: password,
+            password: password
         };
 
         const options = {
-            headers: generateHeaders(),
+            headers: generateHeaders()
         };
 
         try {
-            const response: AxiosResponse<Token> = await axios.post(
-                `${API_URL}/auth/token/`,
-                data,
-                options
-            );
+            const response: AxiosResponse<Token> = await axios.post(`${API_URL}/auth/token/`, data, options);
             if (response.data.access && response.data.refresh) {
                 localStorage.setItem('access_token', response.data.access);
                 localStorage.setItem('refresh_token', response.data.refresh);
@@ -217,10 +189,7 @@ const Authentication = {
             }
         } catch (err) {
             if (localStorage.getItem('DEBUG') === '*') {
-                console.error(
-                    'An error occurred when attempting to login: ',
-                    err
-                );
+                console.error('An error occurred when attempting to login: ', err);
             }
             return false;
         }
@@ -253,7 +222,7 @@ const Authentication = {
         }
 
         return false;
-    },
+    }
 };
 
 export default Authentication;
