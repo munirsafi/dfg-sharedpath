@@ -8,7 +8,6 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import LandZone
 
-
 class LandZoneView(APIView):
     authentication_classes = []
 
