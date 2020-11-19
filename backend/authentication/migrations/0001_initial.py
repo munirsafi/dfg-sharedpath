@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ('community', models.CharField(blank=True, max_length=250, verbose_name='community name')),
                 ('community_role', models.CharField(blank=True, max_length=250, verbose_name='community role')),
                 ('community_email', models.EmailField(blank=True, max_length=254, verbose_name='community email')),
-                ('community_link', models.CharField(blank=True, verbose_name='community link')),
+                ('community_link', models.CharField(blank=True, max_length=500, verbose_name='community link')),
                 ('community_phone', models.CharField(blank=True,  max_length=17, validators=[django.core.validators.RegexValidator(message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.", regex='^\\+?1?\\d{9,15}$')], verbose_name='community phone')),
                 ('last_name', models.CharField(blank=True, max_length=150, verbose_name='last name')),
                 ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
