@@ -11,5 +11,5 @@ class LandZone(models.Model):
     :since      2020-11-18
     """
     uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
-    geo_json = models.JSONField(verbose_name='geo json')
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    geo_json = models.JSONField(default=None, verbose_name='geo json')
+    owner = models.ForeignKey(default=None, to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

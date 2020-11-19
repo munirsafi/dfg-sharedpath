@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 import Http from './Http';
 
@@ -56,11 +55,11 @@ const Authentication = {
     authenticate: async () : Promise<void> => {
         const refresh = localStorage.getItem('refresh_token');
 
-        if (refresh !== '' || refresh !== null) {
+        if (refresh !== '' && refresh !== null) {
             if (refreshStarted === false) {
                 refreshStarted = true;
                 expectedTime = Date.now() + refreshInterval;
-                refreshTimer = setTimeout(refreshToken, refreshInterval);
+                refreshToken();
             }
         }
     },

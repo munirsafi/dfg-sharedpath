@@ -1,231 +1,185 @@
 //@ts-nocheck
-import React from 'react';
-import { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as turf from '@turf/turf';
-import L, { polygon } from 'leaflet';
+import L from 'leaflet';
 import leafletDraw from 'leaflet-draw';
 
 import './Map.scss';
 import { ontarioBoundary } from './OntarioBoundary';
 
+import LandZoneAPI from '../../services/Landzones';
 import Authentication from '../../services/Authentication';
 import NavBar from '../core/navbar/NavBar';
-import { FeatureGroup } from 'react-leaflet';
+import Sidebar from './Sidebar/Sidebar';
 
 export default function Map() {
 
-    let leafletMap;
+    const [zones, setZones] = useState([]);
+    const [leafletMap, setLeafletMap] = useState();
+
     let drawer = leafletDraw;
 
-    const hideSidebar = () => {
-        const sideBar = document.querySelector('.sidebar');
-        sideBar.style.display = 'none';
-    };
-
-    const polyGroups = [{
-        geoJSON: {
-            "type": "Feature",
-            "properties": {},
-            "geometry": {
-                "type": "Polygon",
-                "coordinates": [
-                    [
-                        [-91, 54],
-                        [-86, 53],
-                        [-83, 52],
-                        [-84, 50],
-                        [-90, 51]
-                    ]
-                ]
-            }
-        },
-        communityInfo: {
-            community: 'Testing',
-            community_email: 'test@test.com'
-        }
-    }, {
-        geoJSON: {
-            "type": "Feature",
-            "properties": {},
-            "geometry": {
-                "type": "Polygon",
-                "coordinates": [
-                    [
-                        [-87, 52],
-                        [-84, 54],
-                        [-84.5, 55],
-                        [-89, 53]
-                    ]
-                ]
-            },
-        },
-        communityInfo: {
-            community: 'Testing 2',
-            community_phone: '+9999999999',
-            community_link: 'https://google.ca/'
-        }
-    }];
+    const fetchZones = async () => {
+        const landZones = await LandZoneAPI.get();
+        setZones(landZones);
+    }
 
     useEffect(() => {
         const mapElement = document.getElementById('map') as HTMLElement;
-        leafletMap = L.map(mapElement, {
+        let map = L.map(mapElement, {
             preferCanvas: true
-        }).setView([43.6532, -79.3832], 11);
+        }).setView([50.672525, -86.353084], 6);
 
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(leafletMap);
+        }).addTo(map);
 
-        const drawnItems = new L.FeatureGroup();
-        leafletMap.addLayer(drawnItems);
+        fetchZones();
+        setLeafletMap(map);
+    }, []);
 
-        for (let area of polyGroups) {
-            const swap = ([a, b]) => [b, a];
-            const coordinates = [];
+    useEffect(() => {
+        if (leafletMap && zones.length > 0) {
+            const drawnItems = new L.FeatureGroup();
+            leafletMap.addLayer(drawnItems);
 
-            for (let coords of area.geoJSON.geometry.coordinates[0]) {
-                coordinates.push(swap(coords));
-            }
+            for (let area of zones) {
+                const swap = ([a, b]) => [b, a];
+                const coordinates = [];
 
-            const polygon = L.polygon(coordinates, { fill: 0, weight: 0});
-            drawnItems.addLayer(polygon);
-        }
-
-        if (Authentication.status() === true) {
-            const drawControl = new L.Control.Draw({
-                position: 'bottomright',
-                draw: {
-                    marker: false,
-                    circlemarker: false,
-                    circle: false,
-                    rectangle: false,
-                    polyline: false
-                },
-                edit: {
-                    featureGroup: drawnItems
+                for (let coords of area.geoJSON.geometry.coordinates[0]) {
+                    coordinates.push(swap(coords));
                 }
-            });
-            leafletMap.addControl(drawControl);
-        }
 
-        leafletMap.on('draw:created', (e) => {
-            const type = (e as L.DrawEvents.Created).layerType,
-                layer = (e as L.DrawEvents.Created).layer;
-
-            if (type === 'polygon') {
-                const geojson = layer.toGeoJSON();
-                console.log(geojson);
+                const polygon = L.polygon(coordinates, { fill: 0, weight: 0 });
+                drawnItems.addLayer(polygon);
             }
 
-            drawnItems.addLayer(layer);
-        });
+            if (Authentication.status() === true) {
+                const drawControl = new L.Control.Draw({
+                    position: 'bottomright',
+                    draw: {
+                        marker: false,
+                        circlemarker: false,
+                        circle: false,
+                        rectangle: false,
+                        polyline: false
+                    },
+                    edit: {
+                        featureGroup: drawnItems
+                    }
+                });
+                leafletMap.addControl(drawControl);
+            }
 
-        const polyLayer = L.geoJSON(ontarioBoundary);
 
-        // // GRID for all of Ontario
-        const bbox: any = polyLayer.getBounds().toBBoxString().split(',').map(Number);
-        const cellSide = 20;
+            leafletMap.on('draw:created', (e) => {
+                const type = (e as L.DrawEvents.Created).layerType,
+                    layer = (e as L.DrawEvents.Created).layer;
 
-        const mask = polyLayer.toGeoJSON().features[0];
-        const options: any = {
-            units: 'kilometers',
-            mask: mask
-        };
+                if (type === 'polygon') {
+                    const geojson = layer.toGeoJSON();
+                    const newZone = {
+                        geoJSON: geojson
+                    }
+                    LandZoneAPI.submit([newZone]);
+                }
 
-        const squareGrid: any = turf.squareGrid(bbox, cellSide, options);
-        const gridLayer = L.geoJSON(squareGrid, {
-            weight: 0,
-            fill: 0
-        }).addTo(leafletMap);
+                layer.setStyle({
+                    fillOpacity: 0,
+                    weight: 0
+                });
 
-        const GridAreas = L.geoJson(squareGrid, {
-            style: function (feature) {
-                return {
+                drawnItems.addLayer(layer);
+            });
+
+            const polyLayer = L.geoJSON(ontarioBoundary);
+
+            // // GRID for all of Ontario
+            const bbox: any = polyLayer.getBounds().toBBoxString().split(',').map(Number);
+            const cellSide = 20;
+
+            const mask = polyLayer.toGeoJSON().features[0];
+            const options: any = {
+                units: 'kilometers',
+                mask: mask
+            };
+
+            const squareGrid: any = turf.squareGrid(bbox, cellSide, options);
+            const gridLayer = L.geoJSON(squareGrid, {
+                weight: 0,
+                fill: 0
+            }).addTo(leafletMap);
+
+            const GridAreas = L.geoJson(squareGrid, {
+                style: {
                     stroke: false,
                     fillColor: 'FFFFFF',
                     fillOpacity: 0
-                };
-            },
-            onEachFeature: function (feature, layer) {
+                },
+                onEachFeature: (feature, layer) => {
 
-                const communities = [];
+                    const communities = [];
 
-                for (let zone of polyGroups) {
-                    const overlap = turf.booleanOverlap(zone.geoJSON, feature);
-                    const contains = turf.booleanContains(zone.geoJSON, feature);
+                    for (let area of zones) {
+                        const overlap = turf.booleanOverlap(area.geoJSON, feature);
+                        const contains = turf.booleanContains(area.geoJSON, feature);
 
-                    if (overlap || contains) {
-                        communities.push(zone.communityInfo);
+                        if (overlap || contains) {
+                            communities.push(area.communityInfo);
+                        }
                     }
-                }
 
-                let popupText = '';
-                for (let i = 0, l = communities.length; i < l; i++) {
-                    const community = communities[i];
-                    popupText += `<b>${community.community}</b><br/>`;
-                    if (community.community_email) popupText += `Email: ${community.community_email}<br/>`;
-                    if (community.community_phone) popupText += `Phone: ${community.community_phone}<br/>`;
-                    if (community.community_link) popupText += `Policy Link: <a href='${community.community_link}' target='_blank'>${community.community_link}</a><br/>`;
-                    if (i !== l - 1) popupText += '<br/><hr/><br/>';
-                }
-                if (popupText !== '') {
-                    layer.bindPopup(popupText);
+                    let popupText = '';
+                    for (let i = 0, l = communities.length; i < l; i++) {
+                        const community = communities[i];
+                        popupText += `<b>${community.community}</b><br/>`;
+                        if (community.community_email) popupText += `Email: ${community.community_email}<br/>`;
+                        if (community.community_phone) popupText += `Phone: ${community.community_phone}<br/>`;
+                        if (community.community_link) popupText += `Policy Link: <a href='${community.community_link}' target='_blank'>${community.community_link}</a><br/>`;
+                        if (i !== l - 1) popupText += '<br/><hr/><br/>';
+                    }
+                    if (popupText !== '') {
+                        layer.bindPopup(popupText);
 
-                    layer.on('mouseover', function (e) {
-                        this.openPopup();
+                        layer.on('mouseover', function (e) {
+                            this.openPopup();
+                        });
+
+                        layer.on('mouseout', function (e) {
+                            this.closePopup();
+                        });
+                    }
+
+                    layer.on('click', () => {
+                        const sideBar = document.querySelector('.sidebar');
+                        sideBar.style.display = 'block';
                     });
-
-                    layer.on('mouseout', function (e) {
-                        this.closePopup();
-                    });
                 }
+            }).addTo(leafletMap);
 
-                layer.on('click', () => {
-                    const sideBar = document.querySelector('.sidebar');
-                    sideBar.style.display = 'block';
+            L.control.scale().addTo(leafletMap);
+            leafletMap.fitBounds(gridLayer.getBounds());
+
+            leafletMap.on('draw:editstart draw:drawstart', (e) => {
+                gridLayer.setStyle({
+                    color: "#ffffff",
+                    weight: 0.25
                 });
-            }
-        }).addTo(leafletMap);
-
-        L.control.scale().addTo(leafletMap);
-        leafletMap.fitBounds(gridLayer.getBounds());
-
-        leafletMap.on('draw:editstart draw:drawstart', (e) => {
-            gridLayer.setStyle({
-                color: "#ffffff",
-                weight: 0.25
             });
-        });
 
-        leafletMap.on('draw:editstop draw:drawstop', (e) => {
-            gridLayer.setStyle({
-                weight: 0,
+            leafletMap.on('draw:editstop draw:drawstop', (e) => {
+                gridLayer.setStyle({
+                    weight: 0,
+                });
             });
-        });
-
-    }, []);
+        }
+    }, [zones]);
 
     return (
         <div style={{ width: 100 + '%', height: 100 + '%' }}>
             <NavBar />
-            <div className='sidebar'>
-                <div className='close-sidebar' onClick={() => hideSidebar()}></div>
-                <div className='sidebar-title'>Ontario Native Groups</div>
-                {polyGroups.map((group, index) => {
-                    return (<div className='community-info'>
-                        <span className='name'>{group.communityInfo.community}</span>
-                        { group.communityInfo.community_email ?
-                            <span>Email Address: <a href={'mailto:' + group.communityInfo.community_email}>{group.communityInfo.community_email}</a></span>
-                            : null}
-                        { group.communityInfo.community_phone ?
-                            <span>Phone Number: < a href={'tel:' + group.communityInfo.community_phone}>{group.communityInfo.community_phone}</a></span>
-                            : null}
-                        { group.communityInfo.community_link ?
-                            <span>Policy Link: <a href={group.communityInfo.community_link}>{group.communityInfo.community_link}</a></span>
-                            : null}
-                    </div>);
-                })}
-            </div>
+            <Sidebar zones={zones} />
             <div id="map"></div>
         </div>
     );

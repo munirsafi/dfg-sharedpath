@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core import serializers
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -7,6 +8,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import LandZone
+
+import json
 
 class LandZoneView(APIView):
     authentication_classes = []
@@ -48,4 +51,27 @@ class LandZoneView(APIView):
         :param      {request} the incoming rest_framework http request object
         """
         land_zones = LandZone.objects.all()
-        return Response({'landzones': land_zones})
+        land_zones_raw_json_string = serializers.serialize('json', land_zones)
+        land_zone_tmp_json = json.loads(land_zones_raw_json_string)
+
+        land_zones_json = []
+
+        for zone in land_zone_tmp_json:
+            AuthUser = get_user_model()
+            user = AuthUser.objects.get(id=zone['fields']['owner'])
+
+            land_zone = {}
+            land_zone['geoJSON'] = zone['fields']['geo_json']
+            land_zone['communityInfo'] = {
+                'community': user.community,
+                'community_role': user.community_role,
+                'community_email': user.community_email,
+                'community_phone': user.community_phone,
+                'community_link': user.community_link
+            }
+            land_zones_json.append(land_zone)
+
+        return Response({'landzones': land_zones_json})
+
+    def delete(self, request):
+        pass

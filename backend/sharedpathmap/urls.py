@@ -7,7 +7,7 @@ from landzones.views import LandZoneView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
-    path('api/landzones', LandZoneView.as_view(), name='landzones'),
+    path('api/landzones/', LandZoneView.as_view(), name='landzones'),
     path('auth/change-password', ChangePasswordView.as_view(), name='change_password'),
     path('auth/update-profile', UpdateProfileView.as_view(), name='update_profile'),
     path('auth/token/', AuthUserObtainPairView.as_view(), name='token_obtain_pair'),
