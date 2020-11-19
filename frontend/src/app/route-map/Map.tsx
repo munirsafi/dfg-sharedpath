@@ -10,6 +10,7 @@ import { ontarioBoundary } from './OntarioBoundary';
 
 import Authentication from '../../services/Authentication';
 import NavBar from '../core/navbar/NavBar';
+import { FeatureGroup } from 'react-leaflet';
 
 export default function Map() {
 
@@ -22,7 +23,6 @@ export default function Map() {
     };
 
     const polyGroups = [{
-        userID: 1,
         geoJSON: {
             "type": "Feature",
             "properties": {},
@@ -44,7 +44,6 @@ export default function Map() {
             community_email: 'test@test.com'
         }
     }, {
-        userID: 2,
         geoJSON: {
             "type": "Feature",
             "properties": {},
@@ -80,6 +79,18 @@ export default function Map() {
         const drawnItems = new L.FeatureGroup();
         leafletMap.addLayer(drawnItems);
 
+        for (let area of polyGroups) {
+            const swap: ([a, b]) => [b, a];
+            const coordinates = [];
+
+            for (let coords of area.geoJSON.geometry.coordinates[0]) {
+                coordinates.push(swap(coords));
+            }
+
+            const polygon = L.polygon(coordinates)
+            drawnItems.addLayer(polygon);
+        }
+
         if (Authentication.status() === true) {
             const drawControl = new L.Control.Draw({
                 position: 'bottomright',
@@ -99,7 +110,7 @@ export default function Map() {
 
         leafletMap.on('draw:created', function (e) {
             const type = (e as L.DrawEvents.Created).layerType,
-            layer = (e as L.DrawEvents.Created).layer;
+                layer = (e as L.DrawEvents.Created).layer;
 
             if (type === 'polygon') {
                 const geojson = layer.toGeoJSON();
@@ -128,15 +139,6 @@ export default function Map() {
             fill: 0
         }).addTo(leafletMap);
 
-        
-
-        for (let area of polyGroups) {
-            L.geoJSON(area.geoJSON, {
-                weight: 0,
-                fill: 0
-            }).addTo(leafletMap);
-        }
-
         const GridAreas = L.geoJson(squareGrid, {
             style: function (feature) {
                 return {
@@ -144,16 +146,12 @@ export default function Map() {
                     fillColor: 'FFFFFF',
                     fillOpacity: 0
                 };
-            },     
+            },
             onEachFeature: function (feature, layer) {
 
-                const communities = []
+                const communities = [];
 
-                for(let zone of polyGroups) {
-
-                    const popupOptions = {maxWidth: 200};
-                    //feature.properties.ObjectID=i;
-
+                for (let zone of polyGroups) {
                     const overlap = turf.booleanOverlap(zone.geoJSON, feature);
                     const contains = turf.booleanContains(zone.geoJSON, feature);
 
@@ -182,16 +180,16 @@ export default function Map() {
                         this.closePopup();
                     });
                 }
-                 
+
                 layer.on('click', () => {
                     const sideBar = document.querySelector('.sidebar');
                     sideBar.style.display = 'block';
                 });
             }
         }).addTo(leafletMap);
-            
+
         L.control.scale().addTo(leafletMap);
-        
+
         leafletMap.fitBounds(gridLayer.getBounds());
     }, []);
 
@@ -201,18 +199,18 @@ export default function Map() {
             <div className='sidebar'>
                 <div className='close-sidebar' onClick={() => hideSidebar()}></div>
                 <div className='sidebar-title'>Ontario Native Groups</div>
-                { polyGroups.map((group, index) => {
+                {polyGroups.map((group, index) => {
                     return (<div className='community-info'>
                         <span className='name'>{group.communityInfo.community}</span>
-                        { group.communityInfo.community_email ? 
-                            <span>Email Address: <a href={'mailto:' +group.communityInfo.community_email}>{group.communityInfo.community_email}</a></span>
-                        : null }
+                        { group.communityInfo.community_email ?
+                            <span>Email Address: <a href={'mailto:' + group.communityInfo.community_email}>{group.communityInfo.community_email}</a></span>
+                            : null}
                         { group.communityInfo.community_phone ?
                             <span>Phone Number: < a href={'tel:' + group.communityInfo.community_phone}>{group.communityInfo.community_phone}</a></span>
-                        : null }
+                            : null}
                         { group.communityInfo.community_link ?
                             <span>Policy Link: <a href={group.communityInfo.community_link}>{group.communityInfo.community_link}</a></span>
-                        : null }
+                            : null}
                     </div>);
                 })}
             </div>
