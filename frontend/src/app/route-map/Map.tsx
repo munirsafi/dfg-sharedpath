@@ -87,7 +87,7 @@ export default function Map() {
                 coordinates.push(swap(coords));
             }
 
-            const polygon = L.polygon(coordinates)
+            const polygon = L.polygon(coordinates, { fill: 0, weight: 0});
             drawnItems.addLayer(polygon);
         }
 
@@ -190,14 +190,14 @@ export default function Map() {
         L.control.scale().addTo(leafletMap);
         leafletMap.fitBounds(gridLayer.getBounds());
 
-        leafletMap.on('draw:editstart', (e) => {
+        leafletMap.on('draw:editstart draw:drawstart', (e) => {
             gridLayer.setStyle({
                 color: "#ffffff",
                 weight: 0.25
             });
         });
 
-        leafletMap.on('draw:editstop', (e) => {
+        leafletMap.on('draw:editstop draw:drawstop', (e) => {
             gridLayer.setStyle({
                 weight: 0,
             });
