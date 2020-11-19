@@ -1,11 +1,10 @@
 import axios from 'axios';
 import { AxiosResponse } from 'axios';
 
-import { IHeader } from '../interfaces/header';
+import Http from './Http';
+
 import { Token } from '../interfaces/token';
 import { IUserData } from '../interfaces/userdata';
-
-const API_URL: string = 'http://localhost:8000';
 
 /**
  * @summary     Given a user is logged in and their active refresh token is valid,
@@ -16,7 +15,7 @@ const API_URL: string = 'http://localhost:8000';
  */
 async function refreshToken(): Promise<void> {
     const options = {
-        headers: generateHeaders(true)
+        headers: Http.generateHeaders(true)
     };
 
     const data = {
@@ -24,7 +23,7 @@ async function refreshToken(): Promise<void> {
     };
 
     try {
-        const response: AxiosResponse<Token> = await axios.post(`${API_URL}/refresh`, data, options);
+        const response: AxiosResponse<Token> = await axios.post(`${Http.API_URL}/auth/token/refresh`, data, options);
         if (response.data.access) {
             localStorage.setItem('access_token', response.data.access);
         }
@@ -35,28 +34,7 @@ async function refreshToken(): Promise<void> {
     }
 }
 
-/**
- * @summary     Generate HTTP headers for backend requests
- *
- * @author      Munir Safi
- * @since       2020-11-15
- * @param       authNeeded Indicate if this request needs authorization headers
- * @returns     HTTP header object
- */
-function generateHeaders(authNeeded?: boolean): IHeader {
-    const headers: IHeader = {
-        'Content-Type': 'application/json'
-    };
-    if (authNeeded && authNeeded === true) {
-        const accessToken = localStorage.getItem('access_token');
-
-        if (accessToken !== null) {
-            headers['Authorization'] = `Bearer ${accessToken}`;
-        }
-    }
-
-    return headers;
-}
+let refreshInterval: number | undefined;
 
 const Authentication = {
     /**
@@ -79,11 +57,11 @@ const Authentication = {
         };
 
         const options = {
-            headers: generateHeaders(true)
+            headers: Http.generateHeaders(true)
         };
 
         try {
-            const response: AxiosResponse<Token> = await axios.post(`${API_URL}/auth/change-password`, data, options);
+            const response: AxiosResponse<Token> = await axios.post(`${Http.API_URL}/auth/change-password`, data, options);
             if (response.data.access && response.data.refresh) {
                 localStorage.setItem('access_token', response.data.access);
                 localStorage.setItem('refresh_token', response.data.refresh);
@@ -112,11 +90,11 @@ const Authentication = {
      */
     changeInfo: async (data: any): Promise<boolean> => {
         const options = {
-            headers: generateHeaders(true)
+            headers: Http.generateHeaders(true)
         };
 
         try {
-            const response: AxiosResponse<Token> = await axios.post(`${API_URL}/auth/update-profile`, data, options);
+            const response: AxiosResponse<Token> = await axios.post(`${Http.API_URL}/auth/update-profile`, data, options);
             if (response.data.access && response.data.refresh) {
                 localStorage.setItem('access_token', response.data.access);
                 localStorage.setItem('refresh_token', response.data.refresh);
@@ -176,15 +154,16 @@ const Authentication = {
         };
 
         const options = {
-            headers: generateHeaders()
+            headers: Http.generateHeaders()
         };
 
         try {
-            const response: AxiosResponse<Token> = await axios.post(`${API_URL}/auth/token/`, data, options);
+            const response: AxiosResponse<Token> = await axios.post(`${Http.API_URL}/auth/token/`, data, options);
             if (response.data.access && response.data.refresh) {
                 localStorage.setItem('access_token', response.data.access);
                 localStorage.setItem('refresh_token', response.data.refresh);
 
+                refreshInterval = <number> (<unknown> setInterval(async () => await refreshToken(), 15000));
                 return true;
             }
         } catch (err) {
@@ -204,6 +183,7 @@ const Authentication = {
      * @since       2020-11-14
      */
     logout: (): void => {
+        clearInterval(refreshInterval);
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
     },
