@@ -2,19 +2,20 @@
 import React from 'react';
 import { useEffect } from 'react';
 import * as turf from '@turf/turf';
-import L from 'leaflet';
-import leafletDraw from 'leaflet-draw';
+// import L from 'leaflet';
+// import leafletDraw from 'leaflet-draw';
 
 import './Map.scss';
 import { ontarioBoundary } from './OntarioBoundary';
 
 import Authentication from '../../services/Authentication';
 import NavBar from '../core/navbar/NavBar';
+import { FeatureGroup } from 'react-leaflet';
 
 export default function Map() {
 
   let leafletMap;
-  let drawer = leafletDraw;
+  // let drawer = leafletDraw;
 
   useEffect(() => {
     const mapElement = document.getElementById('map') as HTMLElement;
@@ -26,57 +27,8 @@ export default function Map() {
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(leafletMap);
 
-    const drawnItems = new L.FeatureGroup();
+    var drawnItems = new L.FeatureGroup();
     leafletMap.addLayer(drawnItems);
-
-    if (Authentication.status() === true) {
-      const drawControl = new L.Control.Draw({
-        position: 'bottomright',
-        draw: {
-          marker: false,
-          circlemarker: false,
-          circle: false,
-          rectangle: false,
-          polyline: false
-        },
-        edit: {
-          featureGroup: drawnItems
-        }
-      });
-      leafletMap.addControl(drawControl);
-    }
-
-    leafletMap.on('draw:created', function (e) {
-      const type = (e as L.DrawEvents.Created).layerType,
-        layer = (e as L.DrawEvents.Created).layer;
-
-      if (type === 'polygon') {
-        const geojson = layer.toGeoJSON();
-        console.log(geojson);
-      }
-
-      drawnItems.addLayer(layer);
-    });
-
-    const polyLayer = L.geoJSON(ontarioBoundary);
-
-
-    // // GRID for all of Ontario
-    const bbox: any = polyLayer.getBounds().toBBoxString().split(',').map(Number);
-    const cellSide = 20;
-
-    const mask = polyLayer.toGeoJSON().features[0];
-    const options: any = {
-      units: 'kilometers',
-      mask: mask
-    };
-
-    const squareGrid: any = turf.squareGrid(bbox, cellSide, options);
-    const gridLayer = L.geoJSON(squareGrid, {
-      color: "#ffffff",
-      weight: 0.25,
-      fill: 0
-    }).addTo(leafletMap);
 
 
     const polyGroups = [{
@@ -126,19 +78,67 @@ export default function Map() {
     }];
 
     for (let area of polyGroups) {
+      // L.geoJSON(area.geoJSON, {
+      //   color: '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
+      //   weight: 0.5,
+      //   fill: 0.2
+      // }).bindPopup(`${area.communityInfo.community_name} <br/> ${area.communityInfo.community_email}`)
+      //   .addTo(leafletMap);
 
-      L.geoJSON(area.geoJSON, {
-        color: '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
-        weight: 0.5,
-        fill: 0.2
-      }).bindPopup(`${area.communityInfo.community_name} <br/> ${area.communityInfo.community_email}`)
-        .addTo(leafletMap);
+      var polygon = L.polygon(area.geoJSON.geometry.coordinates[0])
 
-      var polygon = L.polygon(area.geoJSON.geometry.coordinates);
-      console.log(polygon);
       drawnItems.addLayer(polygon);
-
     }
+
+
+    if (Authentication.status() === true) {
+      const drawControl = new L.Control.Draw({
+        position: 'bottomright',
+        draw: {
+          marker: false,
+          circlemarker: false,
+          circle: false,
+          rectangle: false,
+          polyline: false
+        },
+        edit: {
+          featureGroup: drawnItems
+        }
+      });
+      leafletMap.addControl(drawControl);
+    }
+
+    leafletMap.on('draw:created', function (e) {
+      const type = (e as L.DrawEvents.Created).layerType,
+        layer = (e as L.DrawEvents.Created).layer;
+
+      if (type === 'polygon') {
+        const geojson = layer.toGeoJSON();
+        console.log(geojson);
+      }
+
+      drawnItems.addLayer(layer);
+    });
+
+    const polyLayer = L.geoJSON(ontarioBoundary);
+
+
+    // // GRID for all of Ontario
+    const bbox: any = polyLayer.getBounds().toBBoxString().split(',').map(Number);
+    const cellSide = 20;
+
+    const mask = polyLayer.toGeoJSON().features[0];
+    const options: any = {
+      units: 'kilometers',
+      mask: mask
+    };
+
+    const squareGrid: any = turf.squareGrid(bbox, cellSide, options);
+    const gridLayer = L.geoJSON(squareGrid, {
+      color: "#ffffff",
+      weight: 0.25,
+      fill: 0
+    }).addTo(leafletMap);
 
     const GridAreas = L.geoJson(squareGrid, {
       style: function (feature) {
