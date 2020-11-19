@@ -80,7 +80,7 @@ export default function Map() {
         leafletMap.addLayer(drawnItems);
 
         for (let area of polyGroups) {
-            const swap: ([a, b]) => [b, a];
+            const swap = ([a, b]) => [b, a];
             const coordinates = [];
 
             for (let coords of area.geoJSON.geometry.coordinates[0]) {
@@ -108,7 +108,7 @@ export default function Map() {
             leafletMap.addControl(drawControl);
         }
 
-        leafletMap.on('draw:created', function (e) {
+        leafletMap.on('draw:created', (e) => {
             const type = (e as L.DrawEvents.Created).layerType,
                 layer = (e as L.DrawEvents.Created).layer;
 
@@ -134,8 +134,7 @@ export default function Map() {
 
         const squareGrid: any = turf.squareGrid(bbox, cellSide, options);
         const gridLayer = L.geoJSON(squareGrid, {
-            color: "#ffffff",
-            weight: 0.25,
+            weight: 0,
             fill: 0
         }).addTo(leafletMap);
 
@@ -189,8 +188,21 @@ export default function Map() {
         }).addTo(leafletMap);
 
         L.control.scale().addTo(leafletMap);
-
         leafletMap.fitBounds(gridLayer.getBounds());
+
+        leafletMap.on('draw:editstart', (e) => {
+            gridLayer.setStyle({
+                color: "#ffffff",
+                weight: 0.25
+            });
+        });
+
+        leafletMap.on('draw:editstop', (e) => {
+            gridLayer.setStyle({
+                weight: 0,
+            });
+        });
+
     }, []);
 
     return (
