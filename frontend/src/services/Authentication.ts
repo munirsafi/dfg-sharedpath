@@ -14,16 +14,18 @@ import { IUserData } from '../interfaces/userdata';
  * @since       2020-11-14
  */
 async function refreshToken(): Promise<void> {
-    const options = {
-        headers: Http.generateHeaders(true)
-    };
+    const dt = Date.now() - expectedTime;
 
     const data = {
         'refresh': localStorage.getItem('refresh_token')
     };
 
+    const options = {
+        headers: Http.generateHeaders(true)
+    };
+
     try {
-        const response: AxiosResponse<Token> = await axios.post(`${Http.API_URL}/auth/token/refresh`, data, options);
+        const response: AxiosResponse<Token> = await axios.post(`${Http.API_URL}/auth/token/refresh/`, data, options);
         if (response.data.access) {
             localStorage.setItem('access_token', response.data.access);
         }
@@ -32,11 +34,37 @@ async function refreshToken(): Promise<void> {
             console.error('An error occurred when refreshing access token: ', err);
         }
     }
+
+    expectedTime += refreshInterval;
+    refreshTimer = setTimeout(refreshToken, Math.max(0, refreshInterval - dt));
 }
 
-let refreshInterval: number | undefined;
+let expectedTime: number = 0;
+let refreshTimer: any;
+let refreshStarted = false;
+let refreshInterval: number = 285000; // 4 min 45 secs
 
 const Authentication = {
+
+    /**
+     * @summary     Checks to see if refresh token is saved, and starts the refresh
+     *              interval if true
+     * 
+     * @author      Munir Safi
+     * @since       2020-11-18
+     */
+    authenticate: async () : Promise<void> => {
+        const refresh = localStorage.getItem('refresh_token');
+
+        if (refresh !== '' || refresh !== null) {
+            if (refreshStarted === false) {
+                refreshStarted = true;
+                expectedTime = Date.now() + refreshInterval;
+                refreshTimer = setTimeout(refreshToken, refreshInterval);
+            }
+        }
+    },
+
     /**
      * @summary     Change user password, and confirm new password is as the
      *              user expects
@@ -163,7 +191,12 @@ const Authentication = {
                 localStorage.setItem('access_token', response.data.access);
                 localStorage.setItem('refresh_token', response.data.refresh);
 
-                refreshInterval = <number> (<unknown> setInterval(async () => await refreshToken(), 15000));
+                if (refreshStarted === false) {
+                    refreshStarted = true;
+                    expectedTime = Date.now() + refreshInterval;
+                    setTimeout(refreshToken, refreshInterval);
+                }
+
                 return true;
             }
         } catch (err) {
@@ -183,7 +216,7 @@ const Authentication = {
      * @since       2020-11-14
      */
     logout: (): void => {
-        clearInterval(refreshInterval);
+        clearTimeout(refreshTimer);
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
     },

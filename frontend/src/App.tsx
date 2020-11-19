@@ -1,11 +1,16 @@
 import React from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
+import Authentication from './services/Authentication';
+
 import Map from "./app/route-map/Map";
 import Login from "./app/route-login/Login";
 import Profile from "./app/route-profile/Profile";
 
 export default function App() {
+
+    Authentication.authenticate();
+
     return (
         <div id="sharedpath-app">
             <Router>
