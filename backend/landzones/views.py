@@ -42,6 +42,35 @@ class LandZoneView(APIView):
         else:
             return Response({'message': 'You must be logged in to register a new zone!'}, status=status.HTTP_401_UNAUTHORIZED)
 
+    def put(self, request):
+        """
+
+        """
+        if request.headers.get('Authorization', None) is not None:
+            header_token = request.headers['Authorization'].split(' ')[1]
+            jwt_object = JWTAuthentication()
+            valid_token = jwt_object.get_validated_token(header_token)
+            user_email = jwt_object.get_user(valid_token)
+
+            AuthUser = get_user_model()
+            user = AuthUser.objects.get(email=user_email)
+
+            for landzone in request.data['landzones']:
+                if landzone.get('geoJSON', None) is not None:
+                    zone = LandZone.objects.get(uuid=landzone.get('uuid'))
+
+                    if zone.owner == user:
+                        zone.geo_json = landzone.get('geoJSON')
+                        zone.save()
+                    else:
+                        return Response({'message': 'You are attempting to modify an area that you have no privelages for'}, status=status.HTTP_401_UNAUTHORIZED)
+                else:
+                    return Response({'message': 'You must include a \'geoJSON\' property in your array of objects'}, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'You must be logged in to register a new zone!'}, status=status.HTTP_401_UNAUTHORIZED)
+
     def get(self, request):
         """
         Get all landzones
@@ -61,6 +90,7 @@ class LandZoneView(APIView):
             user = AuthUser.objects.get(id=zone['fields']['owner'])
 
             land_zone = {}
+            land_zone['owner'] = user.uuid
             land_zone['geoJSON'] = zone['fields']['geo_json']
             land_zone['communityInfo'] = {
                 'community': user.community,
@@ -69,6 +99,7 @@ class LandZoneView(APIView):
                 'community_phone': user.community_phone,
                 'community_link': user.community_link
             }
+            land_zone['geoJSON']['properties']['uuid'] = zone['fields']['uuid']
             land_zones_json.append(land_zone)
 
         return Response({'landzones': land_zones_json})

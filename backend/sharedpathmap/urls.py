@@ -4,7 +4,7 @@ from django.urls import include, path
 from authentication.views import AuthUserObtainPairView, ChangePasswordView, UpdateProfileView
 from landzones.views import LandZoneView
 
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
     path('api/landzones/', LandZoneView.as_view(), name='landzones'),

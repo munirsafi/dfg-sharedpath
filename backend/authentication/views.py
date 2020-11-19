@@ -30,6 +30,7 @@ class AuthUserToken(RefreshToken):
 
         token = cls()
         token['email'] = user.email
+        token['uuid'] = str(user.uuid)
         token['first_name'] = user.first_name
         token['last_name'] = user.last_name
         token['phone_number'] = user.phone_number

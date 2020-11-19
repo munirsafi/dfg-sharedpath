@@ -40,7 +40,10 @@ export default function Map() {
 
     useEffect(() => {
         if (leafletMap && zones.length > 0) {
+            const editableItems = new L.FeatureGroup();
             const drawnItems = new L.FeatureGroup();
+
+            leafletMap.addLayer(editableItems)
             leafletMap.addLayer(drawnItems);
 
             for (let area of zones) {
@@ -52,7 +55,20 @@ export default function Map() {
                 }
 
                 const polygon = L.polygon(coordinates, { fill: 0, weight: 0 });
-                drawnItems.addLayer(polygon);
+                polygon.id = area.geoJSON.properties.uuid;
+                polygon.owner = area.owner;
+
+                const user = Authentication.getInfo();
+
+                if (user !== null) {
+                    if (polygon.owner === user.uuid) {
+                        editableItems.addLayer(polygon);
+                    } else {
+                        drawnItems.addLayer(polygon);
+                    }
+                } else {
+                    drawnItems.addLayer(polygon);
+                }
             }
 
             if (Authentication.status() === true) {
@@ -66,7 +82,8 @@ export default function Map() {
                         polyline: false
                     },
                     edit: {
-                        featureGroup: drawnItems
+                        featureGroup: editableItems,
+                        remove: true
                     }
                 });
                 leafletMap.addControl(drawControl);
@@ -90,7 +107,34 @@ export default function Map() {
                     weight: 0
                 });
 
-                drawnItems.addLayer(layer);
+                editableItems.addLayer(layer);
+            });
+
+            leafletMap.on('draw:edited', (e) => {
+                const landZones = []
+
+                e.layers.eachLayer((layer) => {
+                    const zone = {
+                        uuid: layer.id,
+                        geoJSON: layer.toGeoJSON()
+                    }
+                    landZones.push(zone);
+                });
+
+                LandZoneAPI.update(landZones);
+            });
+
+            leafletMap.on('draw:editstart draw:drawstart', (e) => {
+                gridLayer.setStyle({
+                    color: "#ffffff",
+                    weight: 0.25
+                });
+            });
+
+            leafletMap.on('draw:editstop draw:drawstop', (e) => {
+                gridLayer.setStyle({
+                    weight: 0,
+                });
             });
 
             const polyLayer = L.geoJSON(ontarioBoundary);
@@ -160,19 +204,6 @@ export default function Map() {
 
             L.control.scale().addTo(leafletMap);
             leafletMap.fitBounds(gridLayer.getBounds());
-
-            leafletMap.on('draw:editstart draw:drawstart', (e) => {
-                gridLayer.setStyle({
-                    color: "#ffffff",
-                    weight: 0.25
-                });
-            });
-
-            leafletMap.on('draw:editstop draw:drawstop', (e) => {
-                gridLayer.setStyle({
-                    weight: 0,
-                });
-            });
         }
     }, [zones]);
 
