@@ -14,7 +14,7 @@ import Authentication from '../../../services/Authentication';
 
 export default function NavBar(props: any) {
     
-    const [isLoggedIn, setIsLoggedIn] = useState(Authentication.status());
+    const [isLoggedIn,] = useState(Authentication.status());
 
     const history = useHistory();
     let buttons;
