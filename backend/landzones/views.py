@@ -44,7 +44,11 @@ class LandZoneView(APIView):
 
     def put(self, request):
         """
+        Updates a list of given landzones
 
+        :author     Munir Safi
+        :since      2020-11-19
+        :param      {request} the incoming rest_framework http request object
         """
         if request.headers.get('Authorization', None) is not None:
             header_token = request.headers['Authorization'].split(' ')[1]
@@ -69,7 +73,7 @@ class LandZoneView(APIView):
 
             return Response(status=status.HTTP_200_OK)
         else:
-            return Response({'message': 'You must be logged in to register a new zone!'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'message': 'You must be logged in to update a zone!'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def get(self, request):
         """
@@ -105,4 +109,30 @@ class LandZoneView(APIView):
         return Response({'landzones': land_zones_json})
 
     def delete(self, request):
-        pass
+        """
+        Deletes a list of given landzones
+
+        :author     Munir Safi
+        :since      2020-11-19
+        :param      {request} the incoming rest_framework http request object
+        """
+        if request.headers.get('Authorization', None) is not None:
+            header_token = request.headers['Authorization'].split(' ')[1]
+            jwt_object = JWTAuthentication()
+            valid_token = jwt_object.get_validated_token(header_token)
+            user_email = jwt_object.get_user(valid_token)
+
+            AuthUser = get_user_model()
+            user = AuthUser.objects.get(email=user_email)
+
+            for landzone_uuid in request.data:
+                zone = LandZone.objects.get(uuid=landzone_uuid)
+
+                if zone.owner == user:
+                    zone.delete()
+                else:
+                    return Response({'message': 'You are attempting to delete an area that you have no privelages for'}, status=status.HTTP_401_UNAUTHORIZED)
+
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'You must be logged in to delete a zone!'}, status=status.HTTP_401_UNAUTHORIZED)

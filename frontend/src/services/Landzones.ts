@@ -5,6 +5,31 @@ import Http from "./Http";
 import { ILandZone } from './../interfaces/landzone';
 
 const LandzoneZPI = {
+    /**
+     * @summary     Given a particular zone uuid, delete that zone from
+     *              existence!
+     * 
+     * @author      Munir Safi
+     * @since       2020-11-19
+     */
+    delete: async (landzoneList: string[]): Promise<number> => {
+        const options = {
+            headers: Http.generateHeaders(true),
+            data: landzoneList
+        };
+
+        try {
+            const response: AxiosResponse<any> = await axios.delete(`${Http.API_URL}/api/landzones/`, options);
+            return response.status;
+        } catch (err) {
+            if (localStorage.getItem("DEBUG") === "*") {
+                console.error("An error occurred when attempting to submit landzones: ", err);
+            }
+
+            return 501;
+        }
+    },
+
     get: async (): Promise<any> => {
         const options = {
             headers: Http.generateHeaders()
@@ -21,7 +46,7 @@ const LandzoneZPI = {
         }
     },
 
-    submit: async (landzoneList: ILandZone[]): Promise<void> => {
+    submit: async (landzoneList: ILandZone[]): Promise<number> => {
         const options = {
             headers: Http.generateHeaders(true),
         };
@@ -30,11 +55,14 @@ const LandzoneZPI = {
         }
 
         try {
-            const response = await axios.post(`${Http.API_URL}/api/landzones/`, data, options);
+            const response: AxiosResponse<any> = await axios.post(`${Http.API_URL}/api/landzones/`, data, options);
+            return response.status;
         } catch (err) {
             if (localStorage.getItem("DEBUG") === "*") {
                 console.error("An error occurred when attempting to submit landzones: ", err);
             }
+
+            return 501;
         }
     },
 
@@ -45,7 +73,7 @@ const LandzoneZPI = {
      * @author      Munir Safi
      * @since       2020-11-19
      */
-    update: async (landzoneList: ILandZone[]): Promise<void> => {
+    update: async (landzoneList: ILandZone[]): Promise<number> => {
         const options = {
             headers: Http.generateHeaders(true)
         }
@@ -56,10 +84,13 @@ const LandzoneZPI = {
 
         try {
             const response: AxiosResponse<any> = await axios.put(`${Http.API_URL}/api/landzones/`, data, options);
+            return response.status;
         } catch (err) {
             if (localStorage.getItem("DEBUG") === "*") {
                 console.error("An error occurred when attempting to submit landzones: ", err);
             }
+
+            return 501;
         }
     }
 };

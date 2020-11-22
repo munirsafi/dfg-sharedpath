@@ -26,25 +26,25 @@ export default function Map() {
 
     useEffect(() => {
         const mapElement = document.getElementById('map') as HTMLElement;
-        let map = L.map(mapElement, {
-            preferCanvas: true
-        }).setView([50.672525, -86.353084], 6);
+        if (leafletMap === undefined) {
+            let map = L.map(mapElement, {
+                minZoom: 4,
+                preferCanvas: true
+            }).setView([50.672525, -86.353084], 7);
 
-        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+            L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
 
-        fetchZones();
-        setLeafletMap(map);
+            fetchZones();
+            setLeafletMap(map);
+        }
     }, []);
 
     useEffect(() => {
-        if (leafletMap && zones.length > 0) {
+        if (leafletMap && zones) {
             const editableItems = new L.FeatureGroup();
             const drawnItems = new L.FeatureGroup();
-
-            leafletMap.addLayer(editableItems)
-            leafletMap.addLayer(drawnItems);
 
             for (let area of zones) {
                 const swap = ([a, b]) => [b, a];
@@ -79,11 +79,11 @@ export default function Map() {
                         circlemarker: false,
                         circle: false,
                         rectangle: false,
-                        polyline: false
+                        polyline: false,
+                        polygon: true
                     },
                     edit: {
-                        featureGroup: editableItems,
-                        remove: true
+                        featureGroup: editableItems
                     }
                 });
                 leafletMap.addControl(drawControl);
@@ -124,6 +124,36 @@ export default function Map() {
                 LandZoneAPI.update(landZones);
             });
 
+            leafletMap.on('draw:deleted', (e) => {
+                const landZones = [];
+
+                e.layers.eachLayer((layer) => {
+                    landZones.push(layer.id);
+                });
+
+                LandZoneAPI.delete(landZones);
+            });
+
+            leafletMap.on('draw:deletestart', () => {
+                editableItems.eachLayer((layer) => {
+                    layer.setStyle({
+                        fill: true,
+                        fillColor: '#FF0000',
+                        fillOpacity: 0.15
+                    });
+                    layer.bringToFront();
+                });
+            });
+
+            leafletMap.on('draw:deletestop', () => {
+                editableItems.eachLayer((layer) => {
+                    layer.setStyle({
+                        fill: false
+                    });
+                    layer.bringToBack();
+                });
+            });
+
             leafletMap.on('draw:editstart draw:drawstart', (e) => {
                 gridLayer.setStyle({
                     color: "#ffffff",
@@ -155,7 +185,7 @@ export default function Map() {
                 fill: 0
             }).addTo(leafletMap);
 
-            const GridAreas = L.geoJson(squareGrid, {
+            L.geoJson(squareGrid, {
                 style: {
                     stroke: false,
                     fillColor: 'FFFFFF',
