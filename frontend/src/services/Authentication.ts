@@ -28,14 +28,18 @@ async function refreshToken(): Promise<void> {
         if (response.data.access) {
             localStorage.setItem('access_token', response.data.access);
         }
+
+        expectedTime += refreshInterval;
+        refreshTimer = setTimeout(refreshToken, Math.max(0, refreshInterval - dt));
     } catch (err) {
         if (localStorage.getItem('DEBUG') === '*') {
             console.error('An error occurred when refreshing access token: ', err);
+
+            if (err.response.status) {
+                Authentication.logout();
+            }
         }
     }
-
-    expectedTime += refreshInterval;
-    refreshTimer = setTimeout(refreshToken, Math.max(0, refreshInterval - dt));
 }
 
 let expectedTime: number = 0;
