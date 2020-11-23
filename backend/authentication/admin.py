@@ -14,8 +14,8 @@ class AuthUserAdmin(UserAdmin):
     :since      2020-11-13
     """
     model = AuthUser
-    list_display = ('email', 'first_name', 'last_name', 'phone_number')
-    ordering = ('email', 'first_name', 'last_name')
+    list_display = ('email', 'community', 'first_name', 'last_name', 'phone_number')
+    ordering = ('email', 'community', 'first_name', 'last_name')
     fieldsets = ()
     add_fieldsets = (
         (None, {'fields': ('email', 'password')}),
