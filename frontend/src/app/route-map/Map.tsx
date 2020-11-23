@@ -16,36 +16,193 @@ export default function Map() {
 
     const [zones, setZones] = useState([]);
     const [leafletMap, setLeafletMap] = useState();
+    const [squareGrid, setSquareGrid] = useState();
+    const [editableItems,] = useState(new L.FeatureGroup());
+    const [drawnItems,] = useState(new L.FeatureGroup());
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let drawer = leafletDraw;
 
+    // Inline function to call when needing to fetch zone objects again
     const fetchZones = async () => {
         const landZones = await LandZoneAPI.get();
         setZones(landZones);
     }
 
+    
+    const openSidebar = () => {
+        const sideBar = document.querySelector('.sidebar');
+        sideBar.style.display = 'block';
+    }
+
     useEffect(() => {
-        const mapElement = document.getElementById('map') as HTMLElement;
         if (leafletMap === undefined) {
-            let map = L.map(mapElement, {
+            // Create map object
+            let map = L.map('map', {
                 minZoom: 4,
                 preferCanvas: true
             }).setView([50.672525, -86.353084], 7);
 
+            // Set tile layer
             L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
 
+            // Add the feature groups which will contain editable and
+            // non-editable polygon shapes
+            map.addLayer(drawnItems);
+            map.addLayer(editableItems);
+
+            // Check if authenticated to add the control toolbar, and to
+            // set which feature group is modifiable
+            if (Authentication.status() === true) {
+                const drawControl = new L.Control.Draw({
+                    position: 'bottomright',
+                    draw: {
+                        marker: false,
+                        circlemarker: false,
+                        circle: false,
+                        rectangle: false,
+                        polyline: false,
+                        polygon: true
+                    },
+                    edit: {
+                        featureGroup: editableItems
+                    }
+                });
+
+                map.addControl(drawControl);
+            }
+
+            // Set the shape of ontario and create the grid for it
+            const ontarioShape = L.geoJSON(ontarioBoundary);
+            const bbox: any = ontarioShape.getBounds().toBBoxString().split(',').map(Number);
+            const cellSide = 20;
+
+            const mask = ontarioShape.toGeoJSON().features[0];
+            const options: any = {
+                units: 'kilometers',
+                mask: mask
+            };
+
+            const gridSquare: any = turf.squareGrid(bbox, cellSide, options);
+            const gridLayer = L.geoJSON(gridSquare, {
+                weight: 0,
+                fill: 0
+            }).addTo(map);
+
+            // Add the zoom tools to the map and zoom to fit Ontario to the screen
+            L.control.scale().addTo(map);
+            map.fitBounds(gridLayer.getBounds());
+
+            // Declare our different map watch events for:
+            // - Drawing creation start/end, modification start/end, deletion start/end
+            map.on('draw:created', async (e) => {
+                const type = (e as L.DrawEvents.Created).layerType,
+                    layer = (e as L.DrawEvents.Created).layer;
+
+                if (type === 'polygon') {
+                    const geojson = layer.toGeoJSON();
+                    const newZone = {
+                        geoJSON: geojson
+                    }
+                    await LandZoneAPI.submit([newZone]);
+                    fetchZones();
+                }
+
+                layer.setStyle({
+                    fillOpacity: 0,
+                    weight: 0
+                });
+
+                editableItems.addLayer(layer);
+            });
+
+            map.on('draw:edited', async (e) => {
+                const landZones = []
+
+                e.layers.eachLayer((layer) => {
+                    const zone = {
+                        uuid: layer.id,
+                        geoJSON: layer.toGeoJSON()
+                    }
+                    landZones.push(zone);
+                });
+
+                await LandZoneAPI.update(landZones);
+                fetchZones();
+            });
+
+            map.on('draw:deleted', async (e) => {
+                const landZones = [];
+
+                e.layers.eachLayer((layer) => {
+                    landZones.push(layer.id);
+                });
+
+                await LandZoneAPI.delete(landZones);
+                fetchZones();
+            });
+
+            map.on('draw:deletestart', () => {
+                editableItems.eachLayer((layer) => {
+                    layer.setStyle({
+                        fill: true,
+                        fillColor: '#FF0000',
+                        fillOpacity: 0.15
+                    });
+                    layer.bringToFront();
+                });
+            });
+
+            map.on('draw:deletestop', () => {
+                editableItems.eachLayer((layer) => {
+                    layer.setStyle({
+                        fill: false
+                    });
+                    layer.bringToBack();
+                });
+            });
+
+            map.on('draw:editstart draw:drawstart', (e) => {
+                gridLayer.setStyle({
+                    color: "#ffffff",
+                    weight: 0.25
+                });
+            });
+
+            map.on('draw:editstop draw:drawstop', (e) => {
+                gridLayer.setStyle({
+                    weight: 0,
+                });
+            });
+
+            // Open sidebar when a user clicks once on desktop, or doubletaps
+            // on a mobile phone
+            if (L.Browser.mobile) {
+                map.on('dblclick', openSidebar)
+            } else {
+                map.on('click', openSidebar);
+            }
+
+            // Finally, fetch the zones from the API and set the map and
+            // grid in our state
             fetchZones();
             setLeafletMap(map);
+            setSquareGrid(gridSquare);
         }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         if (leafletMap && zones) {
-            const editableItems = new L.FeatureGroup();
-            const drawnItems = new L.FeatureGroup();
 
+            // Before adding new layers, reset all our existing layers
+            editableItems.clearLayers();
+
+            // Loop through all returned zones and add them into the 
+            // drawn or editable layer depending on ownership
             for (let area of zones) {
                 const swap = ([a, b]) => [b, a];
                 const coordinates = [];
@@ -71,128 +228,20 @@ export default function Map() {
                 }
             }
 
-            if (Authentication.status() === true) {
-                const drawControl = new L.Control.Draw({
-                    position: 'bottomright',
-                    draw: {
-                        marker: false,
-                        circlemarker: false,
-                        circle: false,
-                        rectangle: false,
-                        polyline: false,
-                        polygon: true
-                    },
-                    edit: {
-                        featureGroup: editableItems
-                    }
-                });
-                leafletMap.addControl(drawControl);
-            }
-
-
-            leafletMap.on('draw:created', (e) => {
-                const type = (e as L.DrawEvents.Created).layerType,
-                    layer = (e as L.DrawEvents.Created).layer;
-
-                if (type === 'polygon') {
-                    const geojson = layer.toGeoJSON();
-                    const newZone = {
-                        geoJSON: geojson
-                    }
-                    LandZoneAPI.submit([newZone]);
-                }
-
-                layer.setStyle({
-                    fillOpacity: 0,
-                    weight: 0
-                });
-
-                editableItems.addLayer(layer);
+            // Delete our old grid markers layer
+            leafletMap.eachLayer((layer) => {
+                if (layer.layerId === 'gridMarkers') leafletMap.removeLayer(layer);
             });
 
-            leafletMap.on('draw:edited', (e) => {
-                const landZones = []
-
-                e.layers.eachLayer((layer) => {
-                    const zone = {
-                        uuid: layer.id,
-                        geoJSON: layer.toGeoJSON()
-                    }
-                    landZones.push(zone);
-                });
-
-                LandZoneAPI.update(landZones);
-            });
-
-            leafletMap.on('draw:deleted', (e) => {
-                const landZones = [];
-
-                e.layers.eachLayer((layer) => {
-                    landZones.push(layer.id);
-                });
-
-                LandZoneAPI.delete(landZones);
-            });
-
-            leafletMap.on('draw:deletestart', () => {
-                editableItems.eachLayer((layer) => {
-                    layer.setStyle({
-                        fill: true,
-                        fillColor: '#FF0000',
-                        fillOpacity: 0.15
-                    });
-                    layer.bringToFront();
-                });
-            });
-
-            leafletMap.on('draw:deletestop', () => {
-                editableItems.eachLayer((layer) => {
-                    layer.setStyle({
-                        fill: false
-                    });
-                    layer.bringToBack();
-                });
-            });
-
-            leafletMap.on('draw:editstart draw:drawstart', (e) => {
-                gridLayer.setStyle({
-                    color: "#ffffff",
-                    weight: 0.25
-                });
-            });
-
-            leafletMap.on('draw:editstop draw:drawstop', (e) => {
-                gridLayer.setStyle({
-                    weight: 0,
-                });
-            });
-
-            const polyLayer = L.geoJSON(ontarioBoundary);
-
-            // // GRID for all of Ontario
-            const bbox: any = polyLayer.getBounds().toBBoxString().split(',').map(Number);
-            const cellSide = 20;
-
-            const mask = polyLayer.toGeoJSON().features[0];
-            const options: any = {
-                units: 'kilometers',
-                mask: mask
-            };
-
-            const squareGrid: any = turf.squareGrid(bbox, cellSide, options);
-            const gridLayer = L.geoJSON(squareGrid, {
-                weight: 0,
-                fill: 0
-            }).addTo(leafletMap);
-
-            L.geoJson(squareGrid, {
+            // Create the grid markers layer that will contain the popup info
+            // for every square that was created in Ontario
+            const areaGrid = L.geoJson(squareGrid, {
                 style: {
                     stroke: false,
                     fillColor: 'FFFFFF',
                     fillOpacity: 0
                 },
                 onEachFeature: (feature, layer) => {
-
                     const communities = [];
 
                     for (let area of zones) {
@@ -224,17 +273,13 @@ export default function Map() {
                             this.closePopup();
                         });
                     }
-
-                    layer.on('click', () => {
-                        const sideBar = document.querySelector('.sidebar');
-                        sideBar.style.display = 'block';
-                    });
                 }
-            }).addTo(leafletMap);
-
-            L.control.scale().addTo(leafletMap);
-            leafletMap.fitBounds(gridLayer.getBounds());
+            });
+            areaGrid.layerId = 'gridMarkers';
+            areaGrid.addTo(leafletMap);
         }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [zones]);
 
     return (
