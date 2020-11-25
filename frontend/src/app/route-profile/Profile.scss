@@ -15,7 +15,13 @@
     }
 
     .submit-button {
+        background-color: #ae3824;
+        color: #fff;
         margin: 35px 0;
+
+        &:hover {
+            background-color: #959595;
+        }
     }
 
     .section-split {

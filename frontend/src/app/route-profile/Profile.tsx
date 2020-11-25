@@ -116,7 +116,7 @@ export default function Profile() {
                         <TextField
                             label='Email'
                             defaultValue={emailAddress}
-                            helperText="You cannot change your email address. If you'd like to update your email, please contact a SharedPath administrator."
+                            helperText="You cannot change your email address. If you'd like to update your email, please contact an SPCI administrator."
                             variant='outlined'
                             fullWidth
                             disabled
@@ -138,7 +138,6 @@ export default function Profile() {
                     size='large'
                     className='submit-button'
                     variant='contained'
-                    color='primary'
                     onClick={() => updatePersonalInfo()}
                 >
                     Update Personal Information
@@ -199,7 +198,6 @@ export default function Profile() {
                     size='large'
                     className='submit-button'
                     variant='contained'
-                    color='primary'
                     onClick={() => updateCommunityInfo()}
                 >
                     Update Community Information
@@ -233,7 +231,6 @@ export default function Profile() {
                     size='large'
                     className='submit-button'
                     variant='contained'
-                    color='primary'
                     onClick={() => updatePassword()}
                 >
                     Update Password

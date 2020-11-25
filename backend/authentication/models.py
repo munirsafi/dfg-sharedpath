@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
 
+from uuid import uuid4
+
 from .managers import AuthUserManager
 
 class AuthUser(AbstractUser):
@@ -16,6 +18,7 @@ class AuthUser(AbstractUser):
     """
     username = None
     email = models.EmailField(_('email address'), unique=True)
+    uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
 
     phone_regex = RegexValidator(
         regex=r'^\+?1?\d{9,15}$',
