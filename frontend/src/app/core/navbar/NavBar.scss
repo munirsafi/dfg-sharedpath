@@ -2,6 +2,20 @@
     margin-right: 16px;
 }
 
+.header {
+    background-image: url('../../../assets/images/SPCI_Home_Hero.jpg');
+    background-size: cover;
+}
+
+.header-appbar {
+    background-color: rgba(64, 80, 84, .8) !important;
+    height: 95px;
+}
+
 .header-toolbar {
     justify-content: space-between;
+}
+
+.menu-button:hover {
+    background-color: inherit !important;
 }

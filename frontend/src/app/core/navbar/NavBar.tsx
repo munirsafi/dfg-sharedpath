@@ -10,6 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 import { useHistory } from "react-router-dom";
 
 import './NavBar.scss'
+import Logo from '../../../assets/images/logo.svg';
 import Authentication from '../../../services/Authentication';
 
 export default function NavBar(props: any) {
@@ -52,16 +53,16 @@ export default function NavBar(props: any) {
 
     return (
         <div className="header">
-            <AppBar position="static">
+            <AppBar position="static" className="header-appbar">
                 <Toolbar className="header-toolbar">
                     <IconButton
                         edge="start"
                         className="menu-button"
-                        color="inherit"
                         aria-label="menu"
                         onClick={() => history.push('/')}
+                        disableRipple
                     >
-                        SP
+                        <img src={Logo} alt="logo" />
                     </IconButton>
                     {buttons}
                 </Toolbar>
