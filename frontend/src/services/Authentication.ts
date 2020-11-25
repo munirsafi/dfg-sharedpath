@@ -9,7 +9,7 @@ import { IUserData } from '../interfaces/userdata';
  * @summary     Given a user is logged in and their active refresh token is valid,
  *              request a new refresh token
  *
- * @author      Xunkai Chen, Munir Safi
+ * @author      Munir Safi, Xuankai Chen
  * @since       2020-11-14
  */
 async function refreshToken(): Promise<void> {
@@ -37,6 +37,7 @@ async function refreshToken(): Promise<void> {
 
             if (err.response.status) {
                 Authentication.logout();
+                window.location.reload();
             }
         }
     }

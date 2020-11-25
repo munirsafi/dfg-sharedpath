@@ -169,12 +169,20 @@ export default function Map() {
                     color: "#ffffff",
                     weight: 0.25
                 });
+
+                map.off('click');
             });
 
             map.on('draw:editstop draw:drawstop', (e) => {
                 gridLayer.setStyle({
-                    weight: 0,
+                    weight: 0
                 });
+
+                if (L.Browser.mobile) {
+                    map.on('dblclick', openSidebar)
+                } else {
+                    map.on('click', openSidebar);
+                }
             });
 
             // Open sidebar when a user clicks once on desktop, or doubletaps
@@ -242,6 +250,7 @@ export default function Map() {
                     fillOpacity: 0
                 },
                 onEachFeature: (feature, layer) => {
+                    const communitiesHash = {};
                     const communities = [];
 
                     for (let area of zones) {
@@ -249,7 +258,10 @@ export default function Map() {
                         const contains = turf.booleanContains(area.geoJSON, feature);
 
                         if (overlap || contains) {
-                            communities.push(area.communityInfo);
+                            if (communitiesHash.hasOwnProperty(area.communityInfo.community + area.communityInfo.community_email) === false) {
+                                communities.push(area.communityInfo);
+                                communitiesHash[area.communityInfo.community + area.communityInfo.community_email] = true;
+                            }
                         }
                     }
 
